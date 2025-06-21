@@ -1,29 +1,42 @@
 {
   "expo": {
-    "name": "task-manager-mobile-clean",
-    "slug": "task-manager-mobile-clean",
+    "name": "TaskManager",
+    "slug": "task-manager",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/images/powerwater-logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#EC4899"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.powerwater.taskmaster"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/powerwater-logo.png",
+        "backgroundColor": "#EC4899"
       },
-      "edgeToEdgeEnabled": true
+      "package": "com.yourcompany.taskmaster"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#EC4899",
+          "image": "./assets/images/powerwater-logo.png",
+          "imageWidth": 200
+        }
+      ]
+    ]
   }
 }
