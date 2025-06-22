@@ -1,6 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios, { InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import React, { createContext, ReactNode, useContext, useEffect, useReducer } from 'react';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios, { InternalAxiosRequestConfig, AxiosResponse } from "axios";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useReducer,
+} from "react";
 
 // Extend the InternalAxiosRequestConfig to include our custom _retry property
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -32,11 +38,17 @@ interface AuthContextType extends AuthState {
 
 // Action types
 type AuthAction =
-  | { type: 'AUTH_LOADING'; payload: boolean }
-  | { type: 'AUTH_SUCCESS'; payload: { user: User; accessToken: string; refreshToken: string } }
-  | { type: 'AUTH_ERROR' }
-  | { type: 'AUTH_LOGOUT' }
-  | { type: 'TOKEN_REFRESH'; payload: { accessToken: string; refreshToken: string } };
+  | { type: "AUTH_LOADING"; payload: boolean }
+  | {
+      type: "AUTH_SUCCESS";
+      payload: { user: User; accessToken: string; refreshToken: string };
+    }
+  | { type: "AUTH_ERROR" }
+  | { type: "AUTH_LOGOUT" }
+  | {
+      type: "TOKEN_REFRESH";
+      payload: { accessToken: string; refreshToken: string };
+    };
 
 // Initial state
 const initialState: AuthState = {
@@ -50,12 +62,12 @@ const initialState: AuthState = {
 // Reducer
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
-    case 'AUTH_LOADING':
+    case "AUTH_LOADING":
       return {
         ...state,
         isLoading: action.payload,
       };
-    case 'AUTH_SUCCESS':
+    case "AUTH_SUCCESS":
       return {
         ...state,
         user: action.payload.user,
@@ -64,7 +76,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAuthenticated: true,
         isLoading: false,
       };
-    case 'AUTH_ERROR':
+    case "AUTH_ERROR":
       return {
         ...state,
         user: null,
@@ -73,7 +85,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAuthenticated: false,
         isLoading: false,
       };
-    case 'AUTH_LOGOUT':
+    case "AUTH_LOGOUT":
       return {
         ...state,
         user: null,
@@ -82,7 +94,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isAuthenticated: false,
         isLoading: false,
       };
-    case 'TOKEN_REFRESH':
+    case "TOKEN_REFRESH":
       return {
         ...state,
         accessToken: action.payload.accessToken,
@@ -97,13 +109,13 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // API Base URL
-const API_BASE_URL = 'https://humane-properly-bug.ngrok-free.app/api';
+const API_BASE_URL = "https://humane-properly-bug.ngrok-free.app/api";
 
 // Storage keys
 const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'access_token',
-  REFRESH_TOKEN: 'refresh_token',
-  USER: 'user',
+  ACCESS_TOKEN: "access_token",
+  REFRESH_TOKEN: "refresh_token",
+  USER: "user",
 };
 
 // Create axios instance
@@ -111,8 +123,8 @@ const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
   },
 });
 
@@ -131,7 +143,7 @@ const processQueue = (error: any, token: string | null = null) => {
       resolve(token);
     }
   });
-  
+
   failedQueue = [];
 };
 
@@ -140,7 +152,7 @@ const getStoredRefreshToken = async (): Promise<string | null> => {
   try {
     return await AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
   } catch (error) {
-    console.error('Error getting stored refresh token:', error);
+    console.error("Error getting stored refresh token:", error);
     return null;
   }
 };
@@ -152,6 +164,19 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+
+  // Helper function to clear auth data
+  const clearAuthData = async () => {
+    try {
+      await Promise.all([
+        AsyncStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN),
+        AsyncStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN),
+        AsyncStorage.removeItem(STORAGE_KEYS.USER),
+      ]);
+    } catch (error) {
+      console.error("Error clearing auth data:", error);
+    }
+  };
 
   // Setup axios interceptors
   useEffect(() => {
@@ -175,10 +200,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       async (error) => {
         const originalRequest: CustomAxiosRequestConfig = error.config;
 
+        // Don't intercept if there's no config or if it's already been retried
+        if (!originalRequest) {
+          return Promise.reject(error);
+        }
+
         // Don't intercept auth endpoints to avoid recursion
-        if (originalRequest.url?.includes('/auth/login') || 
-            originalRequest.url?.includes('/auth/register') ||
-            originalRequest.url?.includes('/auth/refresh')) {
+        if (
+          originalRequest.url?.includes("/auth/login") ||
+          originalRequest.url?.includes("/auth/register") ||
+          originalRequest.url?.includes("/auth/refresh")
+        ) {
           return Promise.reject(error);
         }
 
@@ -188,14 +220,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             // If already refreshing, queue the request
             return new Promise((resolve, reject) => {
               failedQueue.push({ resolve, reject });
-            }).then((token) => {
-              if (originalRequest.headers && token) {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-              }
-              return apiClient(originalRequest);
-            }).catch((err) => {
-              return Promise.reject(err);
-            });
+            })
+              .then((token) => {
+                if (originalRequest.headers && token) {
+                  originalRequest.headers.Authorization = `Bearer ${token}`;
+                }
+                return apiClient(originalRequest);
+              })
+              .catch((err) => {
+                return Promise.reject(err);
+              });
           }
 
           originalRequest._retry = true;
@@ -204,34 +238,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           try {
             // Get refresh token from AsyncStorage directly
             const storedRefreshToken = await getStoredRefreshToken();
-            
+
             if (!storedRefreshToken) {
-              console.error('No refresh token available');
-              throw new Error('No refresh token available');
+              console.error("No refresh token available");
+              throw new Error("No refresh token available");
             }
 
             // Make refresh request using a clean axios instance
-            const refreshResponse = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-              refreshToken: storedRefreshToken,
-            }, {
-              headers: {
-                'Content-Type': 'application/json',
-                'ngrok-skip-browser-warning': 'true',
+            const refreshResponse = await axios.post(
+              `${API_BASE_URL}/auth/refresh`,
+              {
+                refreshToken: storedRefreshToken,
               },
-            });
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  "ngrok-skip-browser-warning": "true",
+                },
+                timeout: 10000,
+              }
+            );
 
             if (refreshResponse.data.success) {
               const { token, refreshToken } = refreshResponse.data.data;
-              
+
               // Update storage
               await Promise.all([
                 AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token),
                 AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken),
               ]);
-              
+
               // Update state
               dispatch({
-                type: 'TOKEN_REFRESH',
+                type: "TOKEN_REFRESH",
                 payload: { accessToken: token, refreshToken },
               });
 
@@ -241,20 +280,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               }
 
               processQueue(null, token);
-              
+
               // Retry original request
               return apiClient(originalRequest);
             } else {
-              throw new Error('Token refresh failed');
+              throw new Error("Token refresh failed");
             }
           } catch (refreshError) {
-            console.error('Token refresh error:', refreshError);
+            console.error("Token refresh error:", refreshError);
             processQueue(refreshError, null);
-            
+
             // Clear auth data and logout
             await clearAuthData();
-            dispatch({ type: 'AUTH_LOGOUT' });
-            
+            dispatch({ type: "AUTH_LOGOUT" });
+
             return Promise.reject(refreshError);
           } finally {
             isRefreshing = false;
@@ -269,7 +308,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       apiClient.interceptors.request.eject(requestInterceptor);
       apiClient.interceptors.response.eject(responseInterceptor);
     };
-  }, [state.accessToken]);
+  }, [state.accessToken]); // Important: depend on accessToken
 
   // Load user data from storage on app start
   useEffect(() => {
@@ -278,8 +317,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const loadStoredAuth = async () => {
     try {
-      dispatch({ type: 'AUTH_LOADING', payload: true });
-      
+      dispatch({ type: "AUTH_LOADING", payload: true });
+
       const [accessToken, refreshToken, userStr] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
         AsyncStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN),
@@ -289,19 +328,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (accessToken && refreshToken && userStr) {
         const user = JSON.parse(userStr);
         dispatch({
-          type: 'AUTH_SUCCESS',
+          type: "AUTH_SUCCESS",
           payload: { user, accessToken, refreshToken },
         });
       } else {
-        dispatch({ type: 'AUTH_ERROR' });
+        dispatch({ type: "AUTH_ERROR" });
       }
     } catch (error) {
-      console.error('Error loading stored auth:', error);
-      dispatch({ type: 'AUTH_ERROR' });
+      console.error("Error loading stored auth:", error);
+      dispatch({ type: "AUTH_ERROR" });
     }
   };
 
-  const storeAuthData = async (user: User, accessToken: string, refreshToken: string) => {
+  const storeAuthData = async (
+    user: User,
+    accessToken: string,
+    refreshToken: string
+  ) => {
     try {
       await Promise.all([
         AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken),
@@ -309,138 +352,141 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user)),
       ]);
     } catch (error) {
-      console.error('Error storing auth data:', error);
+      console.error("Error storing auth data:", error);
       throw error;
-    }
-  };
-
-  const clearAuthData = async () => {
-    try {
-      await Promise.all([
-        AsyncStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN),
-        AsyncStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN),
-        AsyncStorage.removeItem(STORAGE_KEYS.USER),
-      ]);
-    } catch (error) {
-      console.error('Error clearing auth data:', error);
     }
   };
 
   const login = async (email: string, password: string) => {
     try {
-      dispatch({ type: 'AUTH_LOADING', payload: true });
+      dispatch({ type: "AUTH_LOADING", payload: true });
 
       // Use clean axios instance for login to avoid interceptor issues
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, {
-        email: email.trim().toLowerCase(),
-        password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/login`,
+        {
+          email: email.trim().toLowerCase(),
+          password,
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+          timeout: 10000,
+        }
+      );
+
+      console.log("Login response:", response.data);
 
       if (response.data.success) {
         const { user, token, refreshToken } = response.data.data;
-        
+
         await storeAuthData(user, token, refreshToken);
-        
+
         dispatch({
-          type: 'AUTH_SUCCESS',
+          type: "AUTH_SUCCESS",
           payload: { user, accessToken: token, refreshToken },
         });
       } else {
-        dispatch({ type: 'AUTH_ERROR' });
-        throw new Error(response.data.message || 'Login failed');
+        dispatch({ type: "AUTH_ERROR" });
+        throw new Error(response.data.message || "Login failed");
       }
     } catch (error: any) {
-      dispatch({ type: 'AUTH_ERROR' });
-      
+      console.error("Login error details:", error);
+      dispatch({ type: "AUTH_ERROR" });
+
       // Handle different types of errors
       if (error.response) {
         // Server responded with error status
         const status = error.response.status;
-        const message = error.response.data?.message || 'Login failed';
-        
+        const message = error.response.data?.message || "Login failed";
+
         if (status === 401) {
-          throw new Error('Invalid email or password');
+          throw new Error("Invalid email or password");
         } else if (status === 400) {
           throw new Error(message);
         } else if (status >= 500) {
-          throw new Error('Server error. Please try again later.');
+          throw new Error("Server error. Please try again later.");
         } else {
           throw new Error(message);
         }
       } else if (error.request) {
         // Network error
-        throw new Error('Network error. Please check your connection.');
+        throw new Error("Network error. Please check your connection.");
       } else {
         // Other error
-        throw new Error(error.message || 'Login failed. Please try again.');
+        throw new Error(error.message || "Login failed. Please try again.");
       }
     }
   };
 
   const register = async (name: string, email: string, password: string) => {
     try {
-      dispatch({ type: 'AUTH_LOADING', payload: true });
+      dispatch({ type: "AUTH_LOADING", payload: true });
 
       // Use clean axios instance for register to avoid interceptor issues
-      const response = await axios.post(`${API_BASE_URL}/auth/register`, {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/register`,
+        {
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          password,
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+          timeout: 10000,
+        }
+      );
 
       if (response.data.success) {
         const { user, token, refreshToken } = response.data.data;
-        
+
         await storeAuthData(user, token, refreshToken);
-        
+
         dispatch({
-          type: 'AUTH_SUCCESS',
+          type: "AUTH_SUCCESS",
           payload: { user, accessToken: token, refreshToken },
         });
       } else {
-        dispatch({ type: 'AUTH_ERROR' });
-        throw new Error(response.data.message || 'Registration failed');
+        dispatch({ type: "AUTH_ERROR" });
+        throw new Error(response.data.message || "Registration failed");
       }
     } catch (error: any) {
-      dispatch({ type: 'AUTH_ERROR' });
-      
+      dispatch({ type: "AUTH_ERROR" });
+
       // Handle different types of errors
       if (error.response) {
         // Server responded with error status
         const status = error.response.status;
         const data = error.response.data;
-        
+
         if (status === 400) {
           // Validation errors
           if (data.details && Array.isArray(data.details)) {
-            const errorMessages = data.details.join(', ');
+            const errorMessages = data.details.join(", ");
             throw new Error(errorMessages);
           } else {
-            throw new Error(data.message || 'Invalid input data');
+            throw new Error(data.message || "Invalid input data");
           }
         } else if (status === 409) {
-          throw new Error('Email already exists');
+          throw new Error("Email already exists");
         } else if (status >= 500) {
-          throw new Error('Server error. Please try again later.');
+          throw new Error("Server error. Please try again later.");
         } else {
-          throw new Error(data.message || 'Registration failed');
+          throw new Error(data.message || "Registration failed");
         }
       } else if (error.request) {
         // Network error
-        throw new Error('Network error. Please check your connection.');
+        throw new Error("Network error. Please check your connection.");
       } else {
         // Other error
-        throw new Error(error.message || 'Registration failed. Please try again.');
+        throw new Error(
+          error.message || "Registration failed. Please try again."
+        );
       }
     }
   };
@@ -448,40 +494,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshAccessToken = async (): Promise<string> => {
     try {
       const currentRefreshToken = await getStoredRefreshToken();
-      
+
       if (!currentRefreshToken) {
-        throw new Error('No refresh token available');
+        throw new Error("No refresh token available");
       }
 
       // Use clean axios instance instead of apiClient to avoid interceptor loops
-      const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-        refreshToken: currentRefreshToken,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true',
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/refresh`,
+        {
+          refreshToken: currentRefreshToken,
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "ngrok-skip-browser-warning": "true",
+          },
+          timeout: 10000,
+        }
+      );
 
       if (response.data.success) {
         const { token, refreshToken } = response.data.data;
-        
+
         await Promise.all([
           AsyncStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token),
           AsyncStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken),
         ]);
-        
+
         dispatch({
-          type: 'TOKEN_REFRESH',
+          type: "TOKEN_REFRESH",
           payload: { accessToken: token, refreshToken },
         });
 
         return token;
       } else {
-        throw new Error('Token refresh failed');
+        throw new Error("Token refresh failed");
       }
     } catch (error) {
-      console.error('Token refresh error:', error);
+      console.error("Token refresh error:", error);
       await logout();
       throw error;
     }
@@ -490,10 +541,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = async () => {
     try {
       await clearAuthData();
-      dispatch({ type: 'AUTH_LOGOUT' });
+      dispatch({ type: "AUTH_LOGOUT" });
     } catch (error) {
-      console.error('Logout error:', error);
-      dispatch({ type: 'AUTH_LOGOUT' });
+      console.error("Logout error:", error);
+      dispatch({ type: "AUTH_LOGOUT" });
     }
   };
 
@@ -516,7 +567,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

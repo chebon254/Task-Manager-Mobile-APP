@@ -216,7 +216,11 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
       if (filters?.categoryId) params.append('categoryId', filters.categoryId);
       if (filters?.search) params.append('search', filters.search);
 
+      console.log('Fetching tasks with URL:', `/tasks?${params.toString()}`);
+
       const response = await apiClient.get(`/tasks?${params.toString()}`);
+
+      console.log('Tasks response:', response.data);
 
       if (response.data.success) {
         dispatch({ type: 'SET_TASKS', payload: response.data.data.tasks });
@@ -226,7 +230,9 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     } catch (error: any) {
       const errorMessage = handleApiError(error);
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      throw error;
+      
+      // Don't re-throw here, let the component handle it gracefully
+      console.error('Error fetching tasks:', errorMessage);
     }
   };
 
@@ -289,7 +295,11 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
 
+      console.log('Fetching categories...');
+
       const response = await apiClient.get('/categories');
+
+      console.log('Categories response:', response.data);
 
       if (response.data.success) {
         dispatch({ type: 'SET_CATEGORIES', payload: response.data.data.categories });
@@ -299,7 +309,9 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     } catch (error: any) {
       const errorMessage = handleApiError(error);
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      throw error;
+      
+      // Don't re-throw here, let the component handle it gracefully
+      console.error('Error fetching categories:', errorMessage);
     }
   };
 

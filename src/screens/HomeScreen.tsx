@@ -12,6 +12,8 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { useAuth } from '../context/AuthContext';
 import { Task, useTask } from '../context/TaskContext';
 import { BorderRadius, Colors, FontSizes, FontWeights, Shadows, Spacing } from '../theme/colors';
@@ -37,6 +39,40 @@ const HomeScreen = () => {
 
   const [greeting, setGreeting] = useState('');
 
+  // Debug function to test direct API calls
+  // const testApiCall = async () => {
+  //   try {
+  //     // Get token from storage
+  //     const token = await AsyncStorage.getItem('access_token');
+  //     console.log('Token from storage:', token?.substring(0, 20) + '...');
+      
+  //     if (!token) {
+  //       console.error('No token found in storage');
+  //       Alert.alert('Debug', 'No token found in storage');
+  //       return;
+  //     }
+
+  //     // Make a direct API call
+  //     const response = await axios.get(
+  //       'https://humane-properly-bug.ngrok-free.app/api/tasks',
+  //       {
+  //         headers: {
+  //           'Authorization': `Bearer ${token}`,
+  //           'Content-Type': 'application/json',
+  //           'ngrok-skip-browser-warning': 'true',
+  //         },
+  //         timeout: 10000,
+  //       }
+  //     );
+
+  //     console.log('Direct API call success:', response.data);
+  //     Alert.alert('Debug Success', `Got ${response.data.data?.tasks?.length || 0} tasks`);
+  //   } catch (error: any) {
+  //     console.error('Direct API call error:', error.response?.data || error.message);
+  //     Alert.alert('Debug Error', error.response?.data?.message || error.message);
+  //   }
+  // };
+
   useEffect(() => {
     // Set greeting based on time of day
     const hour = new Date().getHours();
@@ -44,12 +80,28 @@ const HomeScreen = () => {
     else if (hour < 17) setGreeting('Good Afternoon');
     else setGreeting('Good Evening');
 
-    // Fetch data when component mounts
-    loadData();
-  }, []);
+    // Only fetch data if user is authenticated and we have a token
+    if (user && user.id) {
+      // Add a small delay to ensure auth state is fully set
+      const timer = setTimeout(() => {
+        loadData();
+      }, 500); // Increased delay to 500ms
+      
+      return () => clearTimeout(timer);
+    }
+  }, [user]); // Depend on user instead of empty array
 
   const loadData = async () => {
     try {
+      console.log('Loading data for user:', user?.email);
+      
+      // Check if we have tokens first
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        console.error('No access token found, skipping data load');
+        return;
+      }
+      
       await Promise.all([fetchTasks(), fetchCategories()]);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -127,16 +179,25 @@ const HomeScreen = () => {
               <Text style={styles.greeting}>{greeting}!</Text>
               <Text style={styles.userName}>{user?.name}</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.avatarContainer}
-              onPress={() => navigation.navigate('Profile')}
-            >
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {user?.name?.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              {/* Debug Button */}
+              {/* <TouchableOpacity 
+                style={styles.debugButton}
+                onPress={testApiCall}
+              >
+                <Ionicons name="bug" size={20} color={Colors.textPrimary} />
+              </TouchableOpacity> */}
+              <TouchableOpacity 
+                style={styles.avatarContainer}
+                onPress={() => navigation.navigate('Profile')}
+              >
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -386,6 +447,19 @@ const styles = StyleSheet.create({
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  debugButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   greeting: {
