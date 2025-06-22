@@ -1,35 +1,37 @@
-import { Ionicons } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import React, { useEffect, useState } from "react";
+import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 // Context Providers
-import { AuthProvider, useAuth } from './src/context/AuthContext';
-import { TaskProvider } from './src/context/TaskContext';
+import { AuthProvider, useAuth } from "./src/context/AuthContext";
+import { TaskProvider } from "./src/context/TaskContext";
 
 // Screens
-import CreateTaskScreen from './src/screens/CreateTaskScreen';
-import CreateCategoryScreen from './src/screens/CreateCategoryScreen';
-import HomeScreen from './src/screens/HomeScreen';
-import LoginScreen from './src/screens/LoginScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
-import RegisterScreen from './src/screens/RegisterScreen';
-import SplashScreenComponent from './src/screens/SplashScreen';
-import TaskDetailScreen from './src/screens/TaskDetailScreen';
-import TasksScreen from './src/screens/TasksScreen';
+import CreateTaskScreen from "./src/screens/CreateTaskScreen";
+import CreateCategoryScreen from "./src/screens/CreateCategoryScreen";
+import HomeScreen from "./src/screens/HomeScreen";
+import LoginScreen from "./src/screens/LoginScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
+import RegisterScreen from "./src/screens/RegisterScreen";
+import SplashScreenComponent from "./src/screens/SplashScreen";
+import TaskDetailScreen from "./src/screens/TaskDetailScreen";
+import TasksScreen from "./src/screens/TasksScreen";
 
 // Theme
-import { Colors } from './src/theme/colors';
+import { Colors } from "./src/theme/colors";
 
 // Navigation Types
 import {
-    AuthStackParamList,
-    MainTabParamList,
-    RootStackParamList
-} from './src/types/navigation';
+  AuthStackParamList,
+  MainTabParamList,
+  RootStackParamList,
+} from "./src/types/navigation";
 
 // Stack and Tab Navigators
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -39,6 +41,18 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
+// Loading Component for transition states
+const LoadingScreen = () => (
+  <LinearGradient
+    colors={[Colors.gradientStart, Colors.gradientEnd]}
+    style={styles.loadingContainer}
+    start={{ x: 0, y: 0 }}
+    end={{ x: 1, y: 1 }}
+  >
+    <ActivityIndicator size="large" color={Colors.textPrimary} />
+  </LinearGradient>
+);
+
 // Auth Stack Navigator
 const AuthNavigator = () => {
   return (
@@ -46,7 +60,7 @@ const AuthNavigator = () => {
       screenOptions={{
         headerShown: false,
         gestureEnabled: true,
-        animation: 'slide_from_right',
+        animation: "slide_from_right",
       }}
     >
       <AuthStack.Screen name="Login" component={LoginScreen} />
@@ -64,14 +78,14 @@ const TabNavigator = () => {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Tasks') {
-            iconName = focused ? 'list' : 'list-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
+          if (route.name === "Home") {
+            iconName = focused ? "home" : "home-outline";
+          } else if (route.name === "Tasks") {
+            iconName = focused ? "list" : "list-outline";
+          } else if (route.name === "Profile") {
+            iconName = focused ? "person" : "person-outline";
           } else {
-            iconName = 'home-outline';
+            iconName = "home-outline";
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -88,24 +102,24 @@ const TabNavigator = () => {
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: "500",
         },
       })}
     >
-      <MainTabs.Screen 
-        name="Home" 
+      <MainTabs.Screen
+        name="Home"
         component={HomeScreen}
-        options={{ tabBarLabel: 'Home' }}
+        options={{ tabBarLabel: "Home" }}
       />
-      <MainTabs.Screen 
-        name="Tasks" 
+      <MainTabs.Screen
+        name="Tasks"
         component={TasksScreen}
-        options={{ tabBarLabel: 'Tasks' }}
+        options={{ tabBarLabel: "Tasks" }}
       />
-      <MainTabs.Screen 
-        name="Profile" 
+      <MainTabs.Screen
+        name="Profile"
         component={ProfileScreen}
-        options={{ tabBarLabel: 'Profile' }}
+        options={{ tabBarLabel: "Profile" }}
       />
     </MainTabs.Navigator>
   );
@@ -120,28 +134,28 @@ const RootNavigator = () => {
       }}
     >
       <RootStack.Screen name="MainTabs" component={TabNavigator} />
-      <RootStack.Screen 
-        name="TaskDetail" 
+      <RootStack.Screen
+        name="TaskDetail"
         component={TaskDetailScreen}
         options={{
-          presentation: 'modal',
-          animation: 'slide_from_bottom',
+          presentation: "modal",
+          animation: "slide_from_bottom",
         }}
       />
-      <RootStack.Screen 
-        name="CreateTask" 
+      <RootStack.Screen
+        name="CreateTask"
         component={CreateTaskScreen}
         options={{
-          presentation: 'modal',
-          animation: 'slide_from_bottom',
+          presentation: "modal",
+          animation: "slide_from_bottom",
         }}
       />
-      <RootStack.Screen 
-        name="CreateCategory" 
+      <RootStack.Screen
+        name="CreateCategory"
         component={CreateCategoryScreen}
         options={{
-          presentation: 'modal',
-          animation: 'slide_from_bottom',
+          presentation: "modal",
+          animation: "slide_from_bottom",
         }}
       />
     </RootStack.Navigator>
@@ -151,6 +165,7 @@ const RootNavigator = () => {
 // App Content (Inside Auth Provider)
 const AppContent = () => {
   const [showSplash, setShowSplash] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
@@ -160,18 +175,24 @@ const AppContent = () => {
     }
   }, [isLoading]);
 
+  // Handle splash screen completion
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+    // Add loading state for transition from splash to login/home
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 500); // Brief loading period for smooth transition
+  };
+
   // Show splash screen
   if (showSplash) {
-    return (
-      <SplashScreenComponent 
-        onFinish={() => setShowSplash(false)} 
-      />
-    );
+    return <SplashScreenComponent onFinish={handleSplashFinish} />;
   }
 
-  // Show loading while checking auth
-  if (isLoading) {
-    return null; // Or a loading component
+  // Show loading while checking auth or transitioning
+  if (isLoading || isTransitioning) {
+    return <LoadingScreen />;
   }
 
   // Show auth flow or main app based on authentication status
@@ -197,3 +218,11 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

@@ -1,46 +1,54 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { useAuth } from '../context/AuthContext';
-import { BorderRadius, Colors, FontSizes, FontWeights, Shadows, Spacing } from '../theme/colors';
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Image,
+} from "react-native";
+import { useAuth } from "../context/AuthContext";
+import {
+  BorderRadius,
+  Colors,
+  FontSizes,
+  FontWeights,
+  Shadows,
+  Spacing,
+} from "../theme/colors";
 
 interface LoginScreenProps {
   navigation: any;
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   const { login } = useAuth();
 
   const handleLogin = async () => {
     // Clear previous error message
-    setErrorMessage('');
+    setErrorMessage("");
 
     if (!email.trim() || !password.trim()) {
-      setErrorMessage('Please fill in all fields');
+      setErrorMessage("Please fill in all fields");
       return;
     }
 
     if (!isValidEmail(email)) {
-      setErrorMessage('Please enter a valid email address');
+      setErrorMessage("Please enter a valid email address");
       return;
     }
 
@@ -49,9 +57,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       await login(email, password);
       // Navigation will be handled by the AuthProvider/App.tsx
     } catch (error: any) {
-      console.log('Login error:', error.message);
+      console.log("Login error:", error.message);
       // Set error message instead of using Alert
-      setErrorMessage(error.message || 'Login failed. Please try again.');
+      setErrorMessage(error.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -64,9 +72,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
 
   const fillDemoCredentials = () => {
     // Updated to use the correct demo email from your database seed
-    setEmail('kelvinchebon90@gmail.com');
-    setPassword('password123');
-    setErrorMessage(''); // Clear error when filling demo credentials
+    setEmail("kelvinchebon90@gmail.com");
+    setPassword("password123");
+    setErrorMessage(""); // Clear error when filling demo credentials
   };
 
   return (
@@ -76,13 +84,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <StatusBar barStyle="light-content" backgroundColor={Colors.gradientStart} />
-      
-      <KeyboardAvoidingView 
-        style={styles.keyboardView} 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={Colors.gradientStart}
+      />
+
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -91,11 +102,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <View style={styles.header}>
             <View style={styles.logoContainer}>
               <View style={styles.logoIcon}>
-                <Ionicons name="checkmark" size={30} color={Colors.textPrimary} />
+                <Image
+                  source={require("../../assets/images/powerwater-logo.png")}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
               </View>
             </View>
             <Text style={styles.title}>Welcome Back!</Text>
-            <Text style={styles.subtitle}>Sign in to continue to TaskMaster</Text>
+            <Text style={styles.subtitle}>
+              Sign in to continue to TaskMaster
+            </Text>
           </View>
 
           {/* Error Message */}
@@ -111,11 +128,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             {/* Email Input */}
             <View style={styles.inputContainer}>
               <View style={styles.inputWrapper}>
-                <Ionicons 
-                  name="mail-outline" 
-                  size={20} 
-                  color={Colors.textSecondary} 
-                  style={styles.inputIcon} 
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color={Colors.textSecondary}
+                  style={styles.inputIcon}
                 />
                 <TextInput
                   style={styles.textInput}
@@ -125,7 +142,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   onChangeText={(text) => {
                     setEmail(text);
                     // Clear error when user starts typing
-                    if (errorMessage) setErrorMessage('');
+                    if (errorMessage) setErrorMessage("");
                   }}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -138,11 +155,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             {/* Password Input */}
             <View style={styles.inputContainer}>
               <View style={styles.inputWrapper}>
-                <Ionicons 
-                  name="lock-closed-outline" 
-                  size={20} 
-                  color={Colors.textSecondary} 
-                  style={styles.inputIcon} 
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={Colors.textSecondary}
+                  style={styles.inputIcon}
                 />
                 <TextInput
                   style={[styles.textInput, { flex: 1 }]}
@@ -152,7 +169,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   onChangeText={(text) => {
                     setPassword(text);
                     // Clear error when user starts typing
-                    if (errorMessage) setErrorMessage('');
+                    if (errorMessage) setErrorMessage("");
                   }}
                   secureTextEntry={!showPassword}
                   returnKeyType="done"
@@ -162,21 +179,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                   onPress={() => setShowPassword(!showPassword)}
                   style={styles.eyeIcon}
                 >
-                  <Ionicons 
-                    name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                    size={20} 
-                    color={Colors.textSecondary} 
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color={Colors.textSecondary}
                   />
                 </TouchableOpacity>
               </View>
             </View>
 
             {/* Demo Account Button */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.demoButton}
               onPress={fillDemoCredentials}
             >
-              <Text style={styles.demoButtonText}>Use Demo Account (Kelvin)</Text>
+              <Text style={styles.demoButtonText}>
+                Use Demo Account (Kelvin)
+              </Text>
             </TouchableOpacity>
 
             {/* Login Button */}
@@ -191,7 +210,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 ) : (
                   <>
                     <Text style={styles.loginButtonText}>Sign In</Text>
-                    <Ionicons name="arrow-forward" size={20} color={Colors.primary} />
+                    <Ionicons
+                      name="arrow-forward"
+                      size={20}
+                      color={Colors.primary}
+                    />
                   </>
                 )}
               </View>
@@ -207,7 +230,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             {/* Sign Up Link */}
             <View style={styles.signUpContainer}>
               <Text style={styles.signUpText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <TouchableOpacity onPress={() => navigation.navigate("Register")}>
                 <Text style={styles.signUpLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
@@ -232,7 +255,7 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: Spacing.xxl,
   },
   logoContainer: {
@@ -242,27 +265,31 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
     ...Shadows.medium,
   },
   title: {
     fontSize: FontSizes.xxxl,
     color: Colors.textPrimary,
     fontWeight: FontWeights.bold,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: Spacing.sm,
   },
   subtitle: {
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
+  },
+  logoImage: {
+    width: 70,
+    height: 70,
   },
   errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
     borderWidth: 1,
     borderColor: Colors.error,
     borderRadius: BorderRadius.md,
@@ -278,14 +305,14 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   inputContainer: {
     marginBottom: Spacing.lg,
   },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.inputBackground,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
@@ -306,18 +333,18 @@ const styles = StyleSheet.create({
     padding: Spacing.xs,
   },
   demoButton: {
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: Spacing.lg,
   },
   demoButtonText: {
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
   loginButton: {
     backgroundColor: Colors.textPrimary,
     borderRadius: BorderRadius.md,
-    overflow: 'hidden',
+    overflow: "hidden",
     ...Shadows.medium,
     marginBottom: Spacing.lg,
   },
@@ -325,9 +352,9 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   buttonContent: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: Spacing.md + 2,
     paddingHorizontal: Spacing.lg,
   },
@@ -338,8 +365,8 @@ const styles = StyleSheet.create({
     marginRight: Spacing.sm,
   },
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: Spacing.lg,
   },
   dividerLine: {
@@ -353,9 +380,9 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.md,
   },
   signUpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   signUpText: {
     fontSize: FontSizes.md,

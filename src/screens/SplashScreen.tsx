@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,12 @@ import {
   Dimensions,
   StatusBar,
   Easing,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors, FontSizes, FontWeights, Spacing } from '../theme/colors';
+  Image,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Colors, FontSizes, FontWeights, Spacing } from "../theme/colors";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -22,12 +22,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   // Animation values - Initialize only once
   const logoScale = useRef(new Animated.Value(0)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
-  const logoRotation = useRef(new Animated.Value(0)).current;
   const titleOpacity = useRef(new Animated.Value(0)).current;
   const titleTranslateY = useRef(new Animated.Value(30)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
   const subtitleTranslateY = useRef(new Animated.Value(30)).current;
-  
+
   // Loading dots animations
   const dot1Scale = useRef(new Animated.Value(0.5)).current;
   const dot2Scale = useRef(new Animated.Value(0.5)).current;
@@ -76,8 +75,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     // Main animation sequence
     animationSequence = Animated.sequence([
       Animated.delay(200),
-      
-      // Logo entrance
+
+      // Logo entrance (no rotation as requested)
       Animated.parallel([
         Animated.spring(logoScale, {
           toValue: 1,
@@ -91,16 +90,10 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           easing: Easing.out(Easing.quad),
           useNativeDriver: true,
         }),
-        Animated.timing(logoRotation, {
-          toValue: 1,
-          duration: 1000,
-          easing: Easing.out(Easing.back(1.2)),
-          useNativeDriver: true,
-        }),
       ]),
-      
+
       Animated.delay(300),
-      
+
       // Title entrance
       Animated.parallel([
         Animated.timing(titleOpacity, {
@@ -116,9 +109,9 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           useNativeDriver: true,
         }),
       ]),
-      
+
       Animated.delay(200),
-      
+
       // Subtitle entrance
       Animated.parallel([
         Animated.timing(subtitleOpacity, {
@@ -139,11 +132,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     // Start main animation
     animationSequence.start();
 
-    // Set timeout to finish animation
+    // Set timeout to finish animation (5 seconds as requested)
     animationTimeout = setTimeout(() => {
       dotsAnimation.stop();
       handleFinish();
-    }, 3500);
+    }, 5000); // Changed from 3500 to 5000 (5 seconds)
 
     // Cleanup function
     return () => {
@@ -160,7 +153,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   }, [
     logoScale,
     logoOpacity,
-    logoRotation,
     titleOpacity,
     titleTranslateY,
     subtitleOpacity,
@@ -168,13 +160,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     dot1Scale,
     dot2Scale,
     dot3Scale,
-    handleFinish
+    handleFinish,
   ]);
-
-  const logoRotationInterpolated = logoRotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
 
   return (
     <LinearGradient
@@ -183,28 +170,32 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <StatusBar barStyle="light-content" backgroundColor={Colors.gradientStart} />
-      
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={Colors.gradientStart}
+      />
+
       <View style={styles.content}>
-        {/* Animated Logo */}
+        {/* Animated Logo - PowerWater Logo */}
         <Animated.View
           style={[
             styles.logoContainer,
             {
-              transform: [
-                { scale: logoScale },
-                { rotate: logoRotationInterpolated }
-              ],
+              transform: [{ scale: logoScale }], // Removed rotation as requested
               opacity: logoOpacity,
             },
           ]}
         >
           <View style={styles.logoIcon}>
-            <Ionicons name="checkmark-circle" size={50} color={Colors.textPrimary} />
+            <Image
+              source={require("../../assets/images/powerwater-logo.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
           </View>
         </Animated.View>
 
-        {/* Animated App Title */}
+        {/* Animated App Title - Changed to PowerWater */}
         <Animated.Text
           style={[
             styles.title,
@@ -214,7 +205,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             },
           ]}
         >
-          TaskMaster
+          PowerWater
         </Animated.Text>
 
         {/* Animated Subtitle */}
@@ -232,29 +223,17 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 
         {/* Animated Loading Dots */}
         <Animated.View
-          style={[
-            styles.loadingContainer,
-            { opacity: subtitleOpacity },
-          ]}
+          style={[styles.loadingContainer, { opacity: subtitleOpacity }]}
         >
           <View style={styles.loadingDots}>
-            <Animated.View 
-              style={[
-                styles.dot, 
-                { transform: [{ scale: dot1Scale }] }
-              ]} 
+            <Animated.View
+              style={[styles.dot, { transform: [{ scale: dot1Scale }] }]}
             />
-            <Animated.View 
-              style={[
-                styles.dot, 
-                { transform: [{ scale: dot2Scale }] }
-              ]} 
+            <Animated.View
+              style={[styles.dot, { transform: [{ scale: dot2Scale }] }]}
             />
-            <Animated.View 
-              style={[
-                styles.dot, 
-                { transform: [{ scale: dot3Scale }] }
-              ]} 
+            <Animated.View
+              style={[styles.dot, { transform: [{ scale: dot3Scale }] }]}
             />
           </View>
           <Text style={styles.loadingText}>Loading...</Text>
@@ -270,8 +249,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: Spacing.xl,
   },
   logoContainer: {
@@ -281,42 +260,46 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 30,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: Colors.shadow,
     shadowOffset: {
       width: 0,
       height: 12,
     },
     shadowOpacity: 0.58,
-    shadowRadius: 16.00,
+    shadowRadius: 16.0,
     elevation: 24,
+  },
+  logoImage: {
+    width: 80,
+    height: 80,
   },
   title: {
     fontSize: FontSizes.xxxl * 1.2,
     color: Colors.textPrimary,
     fontWeight: FontWeights.bold,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: Spacing.md,
     letterSpacing: 1.5,
   },
   subtitle: {
     fontSize: FontSizes.lg,
     color: Colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 26,
     marginBottom: Spacing.xxl,
     paddingHorizontal: Spacing.md,
   },
   loadingContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: Spacing.xl,
   },
   loadingDots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: Spacing.sm,
   },
   dot: {
