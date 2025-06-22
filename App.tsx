@@ -15,6 +15,9 @@ import { TaskProvider } from "./src/context/TaskContext";
 // Screens
 import CreateTaskScreen from "./src/screens/CreateTaskScreen";
 import CreateCategoryScreen from "./src/screens/CreateCategoryScreen";
+import EditTaskScreen from "./src/screens/EditTaskScreen";
+import EditCategoryScreen from "./src/screens/EditCategoryScreen";
+import CategoriesScreen from "./src/screens/CategoriesScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import LoginScreen from "./src/screens/LoginScreen";
 import ProfileScreen from "./src/screens/ProfileScreen";
@@ -170,6 +173,30 @@ const RootNavigator = () => {
         options={{
           presentation: "modal",
           animation: "slide_from_bottom",
+        }}
+      />
+      <RootStack.Screen
+        name="EditTask"
+        component={EditTaskScreen}
+        options={{
+          presentation: "modal",
+          animation: "slide_from_bottom",
+        }}
+      />
+      <RootStack.Screen
+        name="EditCategory"
+        component={EditCategoryScreen}
+        options={{
+          presentation: "modal",
+          animation: "slide_from_bottom",
+        }}
+      />
+      <RootStack.Screen
+        name="Categories"
+        component={CategoriesScreen}
+        options={{
+          presentation: "card",
+          animation: "slide_from_right",
         }}
       />
     </RootStack.Navigator>

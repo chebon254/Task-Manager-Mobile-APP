@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
+import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
 import {
@@ -16,18 +16,22 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { useTask } from '../context/TaskContext';
+import { Task, useTask } from '../context/TaskContext';
 import { BorderRadius, Colors, FontSizes, FontWeights, Shadows, Spacing } from '../theme/colors';
 import { AllScreensParamList } from '../types/navigation';
 
-type YourScreenNavigationProp = NavigationProp<AllScreensParamList>;
+type EditTaskScreenNavigationProp = NavigationProp<AllScreensParamList>;
 
-type TaskStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED';
+type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
-const CreateTaskScreen = () => {
-  const navigation = useNavigation<YourScreenNavigationProp>();
-  const { categories, createTask, fetchCategories, isLoading } = useTask();
+const EditTaskScreen = () => {
+  const navigation = useNavigation<EditTaskScreenNavigationProp>();
+  const route = useRoute();
+  const { taskId } = route.params as { taskId: string };
+  
+  const { tasks, categories, updateTask, fetchCategories, isLoading } = useTask();
 
+  const [task, setTask] = useState<Task | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState<Date | null>(null);
@@ -37,8 +41,21 @@ const CreateTaskScreen = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    loadTask();
     loadCategories();
-  }, []);
+  }, [taskId]);
+
+  const loadTask = () => {
+    const foundTask = tasks.find((t) => t.id === taskId);
+    if (foundTask) {
+      setTask(foundTask);
+      setTitle(foundTask.title);
+      setDescription(foundTask.description || '');
+      setDueDate(foundTask.dueDate ? new Date(foundTask.dueDate) : null);
+      setSelectedCategoryId(foundTask.categoryId);
+      setStatus(foundTask.status);
+    }
+  };
 
   const loadCategories = async () => {
     try {
@@ -48,7 +65,7 @@ const CreateTaskScreen = () => {
     }
   };
 
-  const handleCreateTask = async () => {
+  const handleUpdateTask = async () => {
     if (!title.trim()) {
       Alert.alert('Error', 'Please enter a task title');
       return;
@@ -62,7 +79,7 @@ const CreateTaskScreen = () => {
     try {
       setIsSubmitting(true);
       
-      await createTask({
+      await updateTask(taskId, {
         title: title.trim(),
         description: description.trim() || undefined,
         dueDate: dueDate?.toISOString(),
@@ -70,11 +87,11 @@ const CreateTaskScreen = () => {
         categoryId: selectedCategoryId,
       });
 
-      Alert.alert('Success', 'Task created successfully!', [
+      Alert.alert('Success', 'Task updated successfully!', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create task');
+      Alert.alert('Error', error.message || 'Failed to update task');
     } finally {
       setIsSubmitting(false);
     }
@@ -106,6 +123,8 @@ const CreateTaskScreen = () => {
         return Colors.success;
       case 'CANCELLED':
         return Colors.error;
+      case 'IN_PROGRESS':
+        return Colors.info;
       default:
         return Colors.warning;
     }
@@ -117,6 +136,8 @@ const CreateTaskScreen = () => {
         return 'checkmark-circle';
       case 'CANCELLED':
         return 'close-circle';
+      case 'IN_PROGRESS':
+        return 'play-circle';
       default:
         return 'time-outline';
     }
@@ -125,6 +146,19 @@ const CreateTaskScreen = () => {
   const handleCreateCategory = () => {
     navigation.navigate('CreateCategory');
   };
+
+  if (!task) {
+    return (
+      <LinearGradient
+        colors={[Colors.gradientStart, Colors.gradientEnd]}
+        style={styles.loadingContainer}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <ActivityIndicator size="large" color={Colors.textPrimary} />
+      </LinearGradient>
+    );
+  }
 
   return (
     <KeyboardAvoidingView 
@@ -147,7 +181,7 @@ const CreateTaskScreen = () => {
           >
             <Ionicons name="close" size={24} color={Colors.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>New Task</Text>
+          <Text style={styles.headerTitle}>Edit Task</Text>
           <View style={styles.placeholder} />
         </View>
       </LinearGradient>
@@ -257,7 +291,7 @@ const CreateTaskScreen = () => {
           )}
         </View>
 
-        {/* Due Date - MOVED ABOVE STATUS */}
+        {/* Due Date */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Due Date (Optional)</Text>
           {dueDate ? (
@@ -292,26 +326,13 @@ const CreateTaskScreen = () => {
               <Text style={styles.addDueDateText}>Add due date</Text>
             </TouchableOpacity>
           )}
-
-          {/* Date Picker - MOVED INSIDE DUE DATE SECTION */}
-          {showDatePicker && (
-            <View style={styles.datePickerContainer}>
-              <DateTimePicker
-                value={dueDate || new Date()}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={onDateChange}
-                minimumDate={new Date()}
-              />
-            </View>
-          )}
         </View>
 
-        {/* Status Selection - NOW AFTER DUE DATE */}
+        {/* Status Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Status</Text>
           <View style={styles.statusContainer}>
-            {(['PENDING', 'COMPLETED', 'CANCELLED'] as TaskStatus[]).map((taskStatus) => (
+            {(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] as TaskStatus[]).map((taskStatus) => (
               <TouchableOpacity
                 key={taskStatus}
                 style={[
@@ -329,29 +350,43 @@ const CreateTaskScreen = () => {
                   styles.statusText,
                   status === taskStatus && styles.selectedStatusText
                 ]}>
-                  {taskStatus.charAt(0) + taskStatus.slice(1).toLowerCase()}
+                  {taskStatus === 'IN_PROGRESS' 
+                    ? 'In Progress'
+                    : taskStatus.charAt(0) + taskStatus.slice(1).toLowerCase()
+                  }
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
+        {/* Date Picker */}
+        {showDatePicker && (
+          <DateTimePicker
+            value={dueDate || new Date()}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={onDateChange}
+            minimumDate={new Date()}
+          />
+        )}
+
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Create Button */}
+      {/* Update Button */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
-            styles.createButton, 
+            styles.updateButton, 
             (!title.trim() || !selectedCategoryId || isSubmitting) && styles.disabledButton
           ]}
-          onPress={handleCreateTask}
+          onPress={handleUpdateTask}
           disabled={!title.trim() || !selectedCategoryId || isSubmitting}
         >
           <LinearGradient
             colors={[Colors.primary, Colors.primaryDark]}
-            style={styles.createButtonGradient}
+            style={styles.updateButtonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
@@ -359,8 +394,8 @@ const CreateTaskScreen = () => {
               <ActivityIndicator size="small" color={Colors.textPrimary} />
             ) : (
               <>
-                <Ionicons name="checkmark" size={20} color={Colors.textPrimary} />
-                <Text style={styles.createButtonText}>Create Task</Text>
+                <Ionicons name="save" size={20} color={Colors.textPrimary} />
+                <Text style={styles.updateButtonText}>Update Task</Text>
               </>
             )}
           </LinearGradient>
@@ -374,6 +409,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     paddingTop: 60,
@@ -566,16 +606,6 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontWeight: FontWeights.medium,
   },
-  // NEW STYLE FOR DATE PICKER CONTAINER
-  datePickerContainer: {
-    marginTop: Spacing.md,
-    backgroundColor: Colors.backgroundCard,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    padding: Spacing.sm,
-    ...Shadows.small,
-  },
   statusContainer: {
     flexDirection: 'row',
     gap: Spacing.sm,
@@ -614,7 +644,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.border,
   },
-  createButton: {
+  updateButton: {
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
     ...Shadows.medium,
@@ -622,18 +652,18 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.5,
   },
-  createButtonGradient: {
+  updateButtonGradient: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: Spacing.md + 2,
     gap: Spacing.sm,
   },
-  createButtonText: {
+  updateButtonText: {
     fontSize: FontSizes.lg,
     color: Colors.textPrimary,
     fontWeight: FontWeights.semibold,
   },
 });
 
-export default CreateTaskScreen;
+export default EditTaskScreen;

@@ -1,13 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { NavigationProp } from '@react-navigation/native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Alert,
     ScrollView,
     StatusBar,
     StyleSheet,
-    Switch,
     Text,
     TouchableOpacity,
     View,
@@ -17,14 +16,12 @@ import { useTask } from '../context/TaskContext';
 import { BorderRadius, Colors, FontSizes, FontWeights, Shadows, Spacing } from '../theme/colors';
 import { AllScreensParamList } from '../types/navigation';
 
-type YourScreenNavigationProp = NavigationProp<AllScreensParamList>;
+type ProfileScreenNavigationProp = NavigationProp<AllScreensParamList>;
 
 const ProfileScreen = () => {
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
   const { user, logout } = useAuth();
   const { tasks, categories } = useTask();
-  
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
 
   // Calculate user statistics
   const totalTasks = tasks.length;
@@ -144,6 +141,25 @@ const ProfileScreen = () => {
           </View>
         </View>
 
+        {/* Management */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Management</Text>
+          
+          <TouchableOpacity 
+            style={styles.settingCard}
+            onPress={() => navigation.navigate('Categories')}
+          >
+            <View style={styles.settingInfo}>
+              <Ionicons name="folder-outline" size={24} color={Colors.primary} />
+              <View style={styles.settingText}>
+                <Text style={styles.settingTitle}>Manage Categories</Text>
+                <Text style={styles.settingSubtitle}>Create, edit, and delete your task categories</Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
+
         {/* Account Actions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
@@ -184,13 +200,11 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // Removed backgroundColor - gradient handles it now
   },
   header: {
     paddingTop: 60,
     paddingBottom: Spacing.xl,
     paddingHorizontal: Spacing.lg,
-    // Removed gradient - parent container has it now
   },
   headerContent: {
     alignItems: 'center',
@@ -241,7 +255,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    // Removed background color
   },
   statsSection: {
     padding: Spacing.lg,
@@ -264,7 +277,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: '48%',
-    backgroundColor: Colors.backgroundCard, // Transparent card
+    backgroundColor: Colors.backgroundCard,
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     alignItems: 'center',

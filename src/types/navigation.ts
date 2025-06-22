@@ -14,6 +14,9 @@ export type RootStackParamList = {
   TaskDetail: { taskId: string };
   CreateTask: undefined;
   CreateCategory: undefined;
+  EditTask: { taskId: string };
+  EditCategory: { categoryId: string };
+  Categories: undefined;
 };
 
 // Combined type for all possible navigation destinations

@@ -30,7 +30,6 @@ import { AllScreensParamList } from "../types/navigation";
 
 type YourScreenNavigationProp = NavigationProp<AllScreensParamList>;
 
-// Fixed to include all possible status values from the API
 type TaskStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
 const TaskDetailScreen = () => {
@@ -65,6 +64,11 @@ const TaskDetailScreen = () => {
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const handleEditTask = () => {
+    if (!task) return;
+    navigation.navigate('EditTask', { taskId: task.id });
   };
 
   const handleDeleteTask = () => {
@@ -236,13 +240,22 @@ const TaskDetailScreen = () => {
             <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Task Details</Text>
-          <TouchableOpacity style={styles.headerButton} onPress={shareTask}>
-            <Ionicons
-              name="share-outline"
-              size={24}
-              color={Colors.textPrimary}
-            />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.headerButton} onPress={handleEditTask}>
+              <Ionicons
+                name="create-outline"
+                size={24}
+                color={Colors.textPrimary}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.headerButton} onPress={shareTask}>
+              <Ionicons
+                name="share-outline"
+                size={24}
+                color={Colors.textPrimary}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -458,6 +471,15 @@ const TaskDetailScreen = () => {
       {/* Footer Actions */}
       <View style={styles.footer}>
         <TouchableOpacity
+          style={[styles.editButton, isUpdating && styles.disabledButton]}
+          onPress={handleEditTask}
+          disabled={isUpdating}
+        >
+          <Ionicons name="create-outline" size={20} color={Colors.primary} />
+          <Text style={styles.editButtonText}>Edit Task</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
           style={[styles.deleteButton, isUpdating && styles.disabledButton]}
           onPress={handleDeleteTask}
           disabled={isUpdating}
@@ -535,11 +557,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  headerActions: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+  },
   headerTitle: {
     fontSize: FontSizes.xl,
     color: Colors.textPrimary,
     fontWeight: FontWeights.semibold,
-    marginTop: Spacing.sm, // Added margin-top as requested
+    marginTop: Spacing.sm,
   },
   content: {
     flex: 1,
@@ -688,11 +714,31 @@ const styles = StyleSheet.create({
     height: 100,
   },
   footer: {
+    flexDirection: "row",
     padding: Spacing.lg,
     borderTopWidth: 1,
     borderTopColor: "rgba(255, 255, 255, 0.1)",
+    gap: Spacing.md,
+  },
+  editButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(203, 26, 104, 0.1)",
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    gap: Spacing.sm,
+  },
+  editButtonText: {
+    fontSize: FontSizes.md,
+    color: Colors.primary,
+    fontWeight: FontWeights.medium,
   },
   deleteButton: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
