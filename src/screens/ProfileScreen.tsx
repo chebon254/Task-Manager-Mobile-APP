@@ -85,16 +85,16 @@ const ProfileScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={[Colors.gradientStart, Colors.gradientEnd]}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       <StatusBar barStyle="light-content" backgroundColor={Colors.gradientStart} />
       
       {/* Header */}
-      <LinearGradient
-        colors={[Colors.gradientStart, Colors.gradientEnd]}
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
+      <View style={styles.header}>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Profile</Text>
         </View>
@@ -114,7 +114,7 @@ const ProfileScreen = () => {
             <Text style={styles.joinDate}>Member since {joinDate}</Text>
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Statistics */}
@@ -140,147 +140,6 @@ const ProfileScreen = () => {
               <Ionicons name="trending-up" size={32} color={Colors.info} />
               <Text style={styles.statValue}>{completionRate}%</Text>
               <Text style={styles.statLabel}>Completion</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Preferences */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Preferences</Text>
-          
-          <View style={styles.settingCard}>
-            <View style={styles.settingInfo}>
-              <Ionicons name="notifications-outline" size={24} color={Colors.primary} />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Notifications</Text>
-                <Text style={styles.settingSubtitle}>Get notified about due tasks</Text>
-              </View>
-            </View>
-            <Switch
-              value={notificationsEnabled}
-              onValueChange={setNotificationsEnabled}
-              trackColor={{ false: Colors.border, true: Colors.primary }}
-              thumbColor={notificationsEnabled ? Colors.textPrimary : Colors.textSecondary}
-            />
-          </View>
-
-          <View style={styles.settingCard}>
-            <View style={styles.settingInfo}>
-              <Ionicons name="moon-outline" size={24} color={Colors.primary} />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Dark Mode</Text>
-                <Text style={styles.settingSubtitle}>Switch to dark theme</Text>
-              </View>
-            </View>
-            <Switch
-              value={darkModeEnabled}
-              onValueChange={setDarkModeEnabled}
-              trackColor={{ false: Colors.border, true: Colors.primary }}
-              thumbColor={darkModeEnabled ? Colors.textPrimary : Colors.textSecondary}
-            />
-          </View>
-        </View>
-
-        {/* App Settings */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>App Settings</Text>
-          
-          <TouchableOpacity 
-            style={styles.settingCard}
-            onPress={() => openSettings('Categories')}
-          >
-            <View style={styles.settingInfo}>
-              <Ionicons name="color-palette-outline" size={24} color={Colors.primary} />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Manage Categories</Text>
-                <Text style={styles.settingSubtitle}>Add, edit, or delete categories</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.settingCard}
-            onPress={() => openSettings('Data Export')}
-          >
-            <View style={styles.settingInfo}>
-              <Ionicons name="download-outline" size={24} color={Colors.primary} />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Export Data</Text>
-                <Text style={styles.settingSubtitle}>Download your tasks and data</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.settingCard}
-            onPress={() => openSettings('Backup & Sync')}
-          >
-            <View style={styles.settingInfo}>
-              <Ionicons name="cloud-outline" size={24} color={Colors.primary} />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Backup & Sync</Text>
-                <Text style={styles.settingSubtitle}>Sync your data across devices</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Support & Info */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Support & Information</Text>
-          
-          <TouchableOpacity 
-            style={styles.settingCard}
-            onPress={() => openSettings('Help Center')}
-          >
-            <View style={styles.settingInfo}>
-              <Ionicons name="help-circle-outline" size={24} color={Colors.primary} />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Help Center</Text>
-                <Text style={styles.settingSubtitle}>Get help and support</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.settingCard}
-            onPress={() => openSettings('Privacy Policy')}
-          >
-            <View style={styles.settingInfo}>
-              <Ionicons name="shield-outline" size={24} color={Colors.primary} />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Privacy Policy</Text>
-                <Text style={styles.settingSubtitle}>How we protect your data</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.settingCard}
-            onPress={() => openSettings('Terms of Service')}
-          >
-            <View style={styles.settingInfo}>
-              <Ionicons name="document-text-outline" size={24} color={Colors.primary} />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>Terms of Service</Text>
-                <Text style={styles.settingSubtitle}>Terms and conditions</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
-          </TouchableOpacity>
-
-          <View style={styles.settingCard}>
-            <View style={styles.settingInfo}>
-              <Ionicons name="information-circle-outline" size={24} color={Colors.primary} />
-              <View style={styles.settingText}>
-                <Text style={styles.settingTitle}>App Version</Text>
-                <Text style={styles.settingSubtitle}>Version 1.0.0</Text>
-              </View>
             </View>
           </View>
         </View>
@@ -318,19 +177,20 @@ const ProfileScreen = () => {
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    // Removed backgroundColor - gradient handles it now
   },
   header: {
     paddingTop: 60,
     paddingBottom: Spacing.xl,
     paddingHorizontal: Spacing.lg,
+    // Removed gradient - parent container has it now
   },
   headerContent: {
     alignItems: 'center',
@@ -373,16 +233,15 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
-    opacity: 0.9,
     marginBottom: Spacing.xs,
   },
   joinDate: {
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
-    opacity: 0.8,
   },
   content: {
     flex: 1,
+    // Removed background color
   },
   statsSection: {
     padding: Spacing.lg,
@@ -405,7 +264,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: '48%',
-    backgroundColor: Colors.backgroundCard,
+    backgroundColor: Colors.backgroundCard, // Transparent card
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     alignItems: 'center',

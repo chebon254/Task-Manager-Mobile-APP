@@ -268,6 +268,7 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.xl,
     color: Colors.textPrimary,
     fontWeight: FontWeights.semibold,
+    marginTop: Spacing.sm,
   },
   placeholder: {
     width: 40,

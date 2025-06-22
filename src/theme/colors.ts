@@ -1,66 +1,65 @@
-
-// Theme colors based on your design images
+// Updated theme colors with your new gradient
 export const Colors = {
-  // Primary gradient colors (from your theme image)
-  primary: '#6366F1', // Indigo
-  primaryDark: '#4F46E5',
-  primaryLight: '#8B5CF6',
-  
+  // Primary gradient colors (your new design)
+  primary: "#cb1a68", // Pink
+  primaryDark: "#340f45", // Dark purple
+  primaryLight: "#e91e63",
+
   // Secondary colors
-  secondary: '#EC4899', // Pink
-  secondaryDark: '#DB2777',
-  
-  // Background gradients
-  gradientStart: '#EC4899', // Pink
-  gradientEnd: '#8B5CF6',   // Purple
-  
-  // UI Colors from your design
-  cardBackground: '#1F2937', // Dark gray
-  cardBackgroundLight: 'rgba(255, 255, 255, 0.1)',
-  
+  secondary: "#cb1a68",
+  secondaryDark: "#340f45",
+
+  // Background gradients (your new colors)
+  gradientStart: "#cb1a68", // Pink
+  gradientEnd: "#340f45", // Dark purple
+
+  // UI Colors
+  cardBackground: "rgba(255, 255, 255, 0.1)", // Transparent cards
+  cardBackgroundLight: "rgba(255, 255, 255, 0.05)",
+
   // Status colors
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
-  
-  // Text colors
-  textPrimary: '#FFFFFF',
-  textSecondary: '#D1D5DB',
-  textMuted: '#9CA3AF',
-  textDark: '#1F2937',
-  
-  // Background colors
-  background: '#111827',
-  backgroundLight: '#1F2937',
-  backgroundCard: 'rgba(255, 255, 255, 0.1)',
-  
-  // Category colors (from your UI design)
+  success: "#10B981",
+  warning: "#F59E0B",
+  error: "#EF4444",
+  info: "#3B82F6",
+
+  // Text colors (white and secondary as requested)
+  textPrimary: "#FFFFFF", // White text
+  textSecondary: "#e6cfe1", // Your requested secondary text color
+  textMuted: "#c8a8c1",
+  textDark: "#1F2937",
+
+  // Background colors - now using gradient throughout
+  background: "#340f45", // Dark purple as fallback
+  backgroundLight: "rgba(255, 255, 255, 0.05)",
+  backgroundCard: "rgba(255, 255, 255, 0.1)", // Transparent cards
+
+  // Category colors
   categories: {
-    work: '#3B82F6',      // Blue
-    personal: '#10B981',   // Green
-    health: '#F59E0B',     // Amber
-    learning: '#8B5CF6',   // Purple
-    shopping: '#EF4444',   // Red
-    meeting: '#EC4899',    // Pink
-    dev: '#06B6D4',       // Cyan
+    work: "#3B82F6",
+    personal: "#10B981",
+    health: "#F59E0B",
+    learning: "#8B5CF6",
+    shopping: "#EF4444",
+    meeting: "#EC4899",
+    dev: "#06B6D4",
   },
-  
-  // Input colors
-  inputBackground: 'rgba(255, 255, 255, 0.1)',
-  inputBorder: 'rgba(255, 255, 255, 0.2)',
-  inputFocused: '#6366F1',
-  
+
+  // Input colors (transparent to work with gradient)
+  inputBackground: "rgba(255, 255, 255, 0.1)",
+  inputBorder: "rgba(255, 255, 255, 0.2)",
+  inputFocused: "#FFFFFF",
+
   // Other UI colors
-  border: 'rgba(255, 255, 255, 0.1)',
-  shadow: 'rgba(0, 0, 0, 0.3)',
-  overlay: 'rgba(0, 0, 0, 0.5)',
-  
+  border: "rgba(255, 255, 255, 0.1)",
+  shadow: "rgba(0, 0, 0, 0.3)",
+  overlay: "rgba(0, 0, 0, 0.5)",
+
   // Button colors
-  buttonPrimary: '#6366F1',
-  buttonSecondary: 'rgba(255, 255, 255, 0.1)',
-  buttonSuccess: '#10B981',
-  buttonDanger: '#EF4444',
+  buttonPrimary: "#FFFFFF",
+  buttonSecondary: "rgba(255, 255, 255, 0.1)",
+  buttonSuccess: "#10B981",
+  buttonDanger: "#EF4444",
 };
 
 export const Spacing = {
@@ -91,10 +90,10 @@ export const FontSizes = {
 };
 
 export const FontWeights = {
-  normal: '400' as const,
-  medium: '500' as const,
-  semibold: '600' as const,
-  bold: '700' as const,
+  normal: "400" as const,
+  medium: "500" as const,
+  semibold: "600" as const,
+  bold: "700" as const,
 };
 
 export const Shadows = {
@@ -114,7 +113,7 @@ export const Shadows = {
       width: 0,
       height: 4,
     },
-    shadowOpacity: 0.30,
+    shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
   },

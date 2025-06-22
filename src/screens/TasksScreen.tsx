@@ -1,41 +1,50 @@
-import { Ionicons } from '@expo/vector-icons';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { Task, TaskFilters, useTask } from '../context/TaskContext';
-import { BorderRadius, Colors, FontSizes, FontWeights, Shadows, Spacing } from '../theme/colors';
-import { AllScreensParamList } from '../types/navigation';
+  Alert,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Task, TaskFilters, useTask } from "../context/TaskContext";
+import {
+  BorderRadius,
+  Colors,
+  FontSizes,
+  FontWeights,
+  Shadows,
+  Spacing,
+} from "../theme/colors";
+import { AllScreensParamList } from "../types/navigation";
 
-type FilterTab = 'all' | 'pending' | 'completed' | 'cancelled';
+type FilterTab = "all" | "pending" | "completed" | "cancelled";
 type TasksScreenNavigationProp = NavigationProp<AllScreensParamList>;
 
 const TasksScreen = () => {
   const navigation = useNavigation<TasksScreenNavigationProp>();
-  const { 
-    tasks, 
-    categories, 
-    isLoading, 
-    refreshing, 
-    fetchTasks, 
-    fetchCategories, 
+  const {
+    tasks,
+    categories,
+    isLoading,
+    refreshing,
+    fetchTasks,
+    fetchCategories,
     refreshData,
-    updateTask 
+    updateTask,
   } = useTask();
 
-  const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<FilterTab>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     loadData();
@@ -50,29 +59,32 @@ const TasksScreen = () => {
     try {
       await Promise.all([fetchTasks(), fetchCategories()]);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error("Error loading data:", error);
     }
   };
 
   const applyFilters = async () => {
     try {
       const filters: TaskFilters = {};
-      
-      if (activeFilter !== 'all') {
-        filters.status = activeFilter.toUpperCase() as 'PENDING' | 'COMPLETED' | 'CANCELLED';
+
+      if (activeFilter !== "all") {
+        filters.status = activeFilter.toUpperCase() as
+          | "PENDING"
+          | "COMPLETED"
+          | "CANCELLED";
       }
-      
+
       if (searchQuery.trim()) {
         filters.search = searchQuery.trim();
       }
-      
+
       if (selectedCategoryId) {
         filters.categoryId = selectedCategoryId;
       }
 
       await fetchTasks(filters);
     } catch (error) {
-      console.error('Error applying filters:', error);
+      console.error("Error applying filters:", error);
     }
   };
 
@@ -80,22 +92,22 @@ const TasksScreen = () => {
     try {
       await refreshData();
     } catch (error) {
-      Alert.alert('Error', 'Failed to refresh data');
+      Alert.alert("Error", "Failed to refresh data");
     }
   };
 
   const handleTaskToggle = async (task: Task) => {
     try {
-      const newStatus = task.status === 'COMPLETED' ? 'PENDING' : 'COMPLETED';
+      const newStatus = task.status === "COMPLETED" ? "PENDING" : "COMPLETED";
       await updateTask(task.id, { status: newStatus });
     } catch (error) {
-      Alert.alert('Error', 'Failed to update task');
+      Alert.alert("Error", "Failed to update task");
     }
   };
 
   const clearFilters = () => {
-    setActiveFilter('all');
-    setSearchQuery('');
+    setActiveFilter("all");
+    setSearchQuery("");
     setSelectedCategoryId(null);
   };
 
@@ -103,29 +115,32 @@ const TasksScreen = () => {
     const date = new Date(dateString);
     const today = new Date();
     const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-    
+
     if (date.toDateString() === today.toDateString()) {
-      return 'Today';
+      return "Today";
     } else if (date.toDateString() === tomorrow.toDateString()) {
-      return 'Tomorrow';
+      return "Tomorrow";
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
     }
   };
 
   const isOverdue = (task: Task) => {
-    if (!task.dueDate || task.status === 'COMPLETED') return false;
+    if (!task.dueDate || task.status === "COMPLETED") return false;
     return new Date(task.dueDate) < new Date();
   };
 
   const getTaskCount = (filter: FilterTab) => {
     switch (filter) {
-      case 'pending':
-        return tasks.filter(task => task.status === 'PENDING').length;
-      case 'completed':
-        return tasks.filter(task => task.status === 'COMPLETED').length;
-      case 'cancelled':
-        return tasks.filter(task => task.status === 'CANCELLED').length;
+      case "pending":
+        return tasks.filter((task) => task.status === "PENDING").length;
+      case "completed":
+        return tasks.filter((task) => task.status === "COMPLETED").length;
+      case "cancelled":
+        return tasks.filter((task) => task.status === "CANCELLED").length;
       default:
         return tasks.length;
     }
@@ -133,11 +148,8 @@ const TasksScreen = () => {
 
   const renderTaskItem = ({ item: task }: { item: Task }) => (
     <TouchableOpacity
-      style={[
-        styles.taskCard,
-        isOverdue(task) && styles.overdueTask
-      ]}
-      onPress={() => navigation.navigate('TaskDetail', { taskId: task.id })}
+      style={[styles.taskCard, isOverdue(task) && styles.overdueTask]}
+      onPress={() => navigation.navigate("TaskDetail", { taskId: task.id })}
     >
       <View style={styles.taskContent}>
         <TouchableOpacity
@@ -145,22 +157,26 @@ const TasksScreen = () => {
           onPress={() => handleTaskToggle(task)}
         >
           <Ionicons
-            name={task.status === 'COMPLETED' ? 'checkmark-circle' : 'ellipse-outline'}
+            name={
+              task.status === "COMPLETED"
+                ? "checkmark-circle"
+                : "ellipse-outline"
+            }
             size={24}
             color={
-              task.status === 'COMPLETED' 
-                ? Colors.success 
-                : isOverdue(task) 
-                ? Colors.error 
+              task.status === "COMPLETED"
+                ? Colors.success
+                : isOverdue(task)
+                ? Colors.error
                 : Colors.textSecondary
             }
           />
         </TouchableOpacity>
         <View style={styles.taskInfo}>
-          <Text 
+          <Text
             style={[
               styles.taskTitle,
-              task.status === 'COMPLETED' && styles.completedTaskTitle
+              task.status === "COMPLETED" && styles.completedTaskTitle,
             ]}
           >
             {task.title}
@@ -171,28 +187,30 @@ const TasksScreen = () => {
             </Text>
           )}
           <View style={styles.taskMeta}>
-            <View 
+            <View
               style={[
-                styles.categoryDot, 
-                { backgroundColor: task.category.color }
-              ]} 
+                styles.categoryDot,
+                { backgroundColor: task.category.color },
+              ]}
             />
             <Text style={styles.categoryName}>{task.category.name}</Text>
             {task.dueDate && (
               <>
                 <Text style={styles.metaSeparator}>•</Text>
-                <Text style={[
-                  styles.dueDate,
-                  isOverdue(task) && styles.overdueDateText
-                ]}>
+                <Text
+                  style={[
+                    styles.dueDate,
+                    isOverdue(task) && styles.overdueDateText,
+                  ]}
+                >
                   {formatDate(task.dueDate)}
                 </Text>
                 {isOverdue(task) && (
-                  <Ionicons 
-                    name="alert-circle" 
-                    size={14} 
-                    color={Colors.error} 
-                    style={styles.overdueIcon} 
+                  <Ionicons
+                    name="alert-circle"
+                    size={14}
+                    color={Colors.error}
+                    style={styles.overdueIcon}
                   />
                 )}
               </>
@@ -201,7 +219,11 @@ const TasksScreen = () => {
         </View>
         <View style={styles.taskActions}>
           <TouchableOpacity style={styles.actionButton}>
-            <Ionicons name="chevron-forward" size={20} color={Colors.textSecondary} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={Colors.textSecondary}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -209,19 +231,19 @@ const TasksScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={[Colors.gradientStart, Colors.gradientEnd]}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       {/* Header */}
-      <LinearGradient
-        colors={[Colors.gradientStart, Colors.gradientEnd]}
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
+      <View style={styles.header}>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Tasks</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.addButton}
-            onPress={() => navigation.navigate('CreateTask')}
+            onPress={() => navigation.navigate("CreateTask")}
           >
             <Ionicons name="add" size={24} color={Colors.textPrimary} />
           </TouchableOpacity>
@@ -230,7 +252,11 @@ const TasksScreen = () => {
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
-            <Ionicons name="search-outline" size={20} color={Colors.textSecondary} />
+            <Ionicons
+              name="search-outline"
+              size={20}
+              color={Colors.textSecondary}
+            />
             <TextInput
               style={styles.searchInput}
               placeholder="Search tasks..."
@@ -240,49 +266,57 @@ const TasksScreen = () => {
               returnKeyType="search"
             />
             {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={20} color={Colors.textSecondary} />
+              <TouchableOpacity onPress={() => setSearchQuery("")}>
+                <Ionicons
+                  name="close-circle"
+                  size={20}
+                  color={Colors.textSecondary}
+                />
               </TouchableOpacity>
             )}
           </View>
         </View>
-      </LinearGradient>
+      </View>
 
       {/* Filter Tabs */}
       <View style={styles.filtersContainer}>
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.filterTabs}
           contentContainerStyle={styles.filterTabsContent}
         >
-          {(['all', 'pending', 'completed', 'cancelled'] as FilterTab[]).map((filter) => (
-            <TouchableOpacity
-              key={filter}
-              style={[
-                styles.filterTab,
-                activeFilter === filter && styles.activeFilterTab
-              ]}
-              onPress={() => setActiveFilter(filter)}
-            >
-              <Text style={[
-                styles.filterTabText,
-                activeFilter === filter && styles.activeFilterTabText
-              ]}>
-                {filter.charAt(0).toUpperCase() + filter.slice(1)}
-              </Text>
-              <View style={styles.filterTabBadge}>
-                <Text style={styles.filterTabBadgeText}>
-                  {getTaskCount(filter)}
+          {(["all", "pending", "completed", "cancelled"] as FilterTab[]).map(
+            (filter) => (
+              <TouchableOpacity
+                key={filter}
+                style={[
+                  styles.filterTab,
+                  activeFilter === filter && styles.activeFilterTab,
+                ]}
+                onPress={() => setActiveFilter(filter)}
+              >
+                <Text
+                  style={[
+                    styles.filterTabText,
+                    activeFilter === filter && styles.activeFilterTabText,
+                  ]}
+                >
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
                 </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+                <View style={styles.filterTabBadge}>
+                  <Text style={styles.filterTabBadgeText}>
+                    {getTaskCount(filter)}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )
+          )}
         </ScrollView>
 
         {/* Category Filter */}
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.categoryFilters}
           contentContainerStyle={styles.categoryFiltersContent}
@@ -290,14 +324,16 @@ const TasksScreen = () => {
           <TouchableOpacity
             style={[
               styles.categoryFilter,
-              !selectedCategoryId && styles.activeCategoryFilter
+              !selectedCategoryId && styles.activeCategoryFilter,
             ]}
             onPress={() => setSelectedCategoryId(null)}
           >
-            <Text style={[
-              styles.categoryFilterText,
-              !selectedCategoryId && styles.activeCategoryFilterText
-            ]}>
+            <Text
+              style={[
+                styles.categoryFilterText,
+                !selectedCategoryId && styles.activeCategoryFilterText,
+              ]}
+            >
               All Categories
             </Text>
           </TouchableOpacity>
@@ -306,22 +342,28 @@ const TasksScreen = () => {
               key={category.id}
               style={[
                 styles.categoryFilter,
-                selectedCategoryId === category.id && styles.activeCategoryFilter
+                selectedCategoryId === category.id &&
+                  styles.activeCategoryFilter,
               ]}
-              onPress={() => setSelectedCategoryId(
-                selectedCategoryId === category.id ? null : category.id
-              )}
+              onPress={() =>
+                setSelectedCategoryId(
+                  selectedCategoryId === category.id ? null : category.id
+                )
+              }
             >
-              <View 
+              <View
                 style={[
-                  styles.categoryFilterDot, 
-                  { backgroundColor: category.color }
-                ]} 
+                  styles.categoryFilterDot,
+                  { backgroundColor: category.color },
+                ]}
               />
-              <Text style={[
-                styles.categoryFilterText,
-                selectedCategoryId === category.id && styles.activeCategoryFilterText
-              ]}>
+              <Text
+                style={[
+                  styles.categoryFilterText,
+                  selectedCategoryId === category.id &&
+                    styles.activeCategoryFilterText,
+                ]}
+              >
                 {category.name}
               </Text>
             </TouchableOpacity>
@@ -329,8 +371,11 @@ const TasksScreen = () => {
         </ScrollView>
 
         {/* Clear Filters */}
-        {(activeFilter !== 'all' || searchQuery || selectedCategoryId) && (
-          <TouchableOpacity style={styles.clearFiltersButton} onPress={clearFilters}>
+        {(activeFilter !== "all" || searchQuery || selectedCategoryId) && (
+          <TouchableOpacity
+            style={styles.clearFiltersButton}
+            onPress={clearFilters}
+          >
             <Text style={styles.clearFiltersText}>Clear Filters</Text>
           </TouchableOpacity>
         )}
@@ -348,30 +393,29 @@ const TasksScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={Colors.primary}
-            colors={[Colors.primary]}
+            tintColor={Colors.textPrimary}
+            colors={[Colors.textPrimary]}
           />
         }
         ListEmptyComponent={() => (
           <View style={styles.emptyState}>
-            <Ionicons 
-              name={searchQuery ? "search" : "document-outline"} 
-              size={64} 
-              color={Colors.textSecondary} 
+            <Ionicons
+              name={searchQuery ? "search" : "document-outline"}
+              size={64}
+              color={Colors.textSecondary}
             />
             <Text style={styles.emptyTitle}>
-              {searchQuery ? 'No Results Found' : 'No Tasks'}
+              {searchQuery ? "No Results Found" : "No Tasks"}
             </Text>
             <Text style={styles.emptySubtitle}>
-              {searchQuery 
+              {searchQuery
                 ? `No tasks match "${searchQuery}"`
-                : 'Create your first task to get started!'
-              }
+                : "Create your first task to get started!"}
             </Text>
             {!searchQuery && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.createTaskButton}
-                onPress={() => navigation.navigate('CreateTask')}
+                onPress={() => navigation.navigate("CreateTask")}
               >
                 <Text style={styles.createTaskText}>Create Task</Text>
               </TouchableOpacity>
@@ -379,14 +423,13 @@ const TasksScreen = () => {
           </View>
         )}
       />
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   header: {
     paddingTop: 60,
@@ -394,9 +437,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
   headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: Spacing.lg,
   },
   headerTitle: {
@@ -408,18 +451,18 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
     ...Shadows.small,
   },
   searchContainer: {
     marginBottom: Spacing.sm,
   },
   searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     height: 48,
@@ -431,7 +474,6 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.sm,
   },
   filtersContainer: {
-    backgroundColor: Colors.backgroundLight,
     paddingVertical: Spacing.sm,
   },
   filterTabs: {
@@ -442,8 +484,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   filterTab: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.backgroundCard,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
@@ -451,7 +493,7 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   activeFilterTab: {
-    backgroundColor: Colors.primary,
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
   },
   filterTabText: {
     fontSize: FontSizes.sm,
@@ -467,7 +509,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 8,
     minWidth: 18,
-    alignItems: 'center',
+    alignItems: "center",
   },
   filterTabBadgeText: {
     fontSize: 10,
@@ -482,8 +524,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   categoryFilter: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.backgroundCard,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
@@ -491,7 +533,7 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   activeCategoryFilter: {
-    backgroundColor: Colors.primary,
+    backgroundColor: "rgba(255, 255, 255, 0.25)",
   },
   categoryFilterDot: {
     width: 8,
@@ -507,14 +549,15 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   clearFiltersButton: {
-    alignSelf: 'center',
+    alignSelf: "center",
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
   },
   clearFiltersText: {
     fontSize: FontSizes.sm,
-    color: Colors.primary,
+    color: Colors.textPrimary,
     fontWeight: FontWeights.medium,
+    opacity: 0.9,
   },
   tasksList: {
     flex: 1,
@@ -533,8 +576,8 @@ const styles = StyleSheet.create({
     borderLeftColor: Colors.error,
   },
   taskContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: Spacing.md,
   },
   taskCheckbox: {
@@ -550,7 +593,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   completedTaskTitle: {
-    textDecorationLine: 'line-through',
+    textDecorationLine: "line-through",
     opacity: 0.6,
   },
   taskDescription: {
@@ -560,8 +603,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   taskMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   categoryDot: {
     width: 8,
@@ -596,7 +639,7 @@ const styles = StyleSheet.create({
     padding: Spacing.xs,
   },
   emptyState: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: Spacing.xxl * 2,
     paddingHorizontal: Spacing.lg,
   },
@@ -610,12 +653,12 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
     marginBottom: Spacing.xl,
   },
   createTaskButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,

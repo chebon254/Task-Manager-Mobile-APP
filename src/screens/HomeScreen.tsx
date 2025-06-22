@@ -13,7 +13,6 @@ import {
     View,
 } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import { useAuth } from '../context/AuthContext';
 import { Task, useTask } from '../context/TaskContext';
 import { BorderRadius, Colors, FontSizes, FontWeights, Shadows, Spacing } from '../theme/colors';
@@ -39,40 +38,6 @@ const HomeScreen = () => {
 
   const [greeting, setGreeting] = useState('');
 
-  // Debug function to test direct API calls
-  // const testApiCall = async () => {
-  //   try {
-  //     // Get token from storage
-  //     const token = await AsyncStorage.getItem('access_token');
-  //     console.log('Token from storage:', token?.substring(0, 20) + '...');
-      
-  //     if (!token) {
-  //       console.error('No token found in storage');
-  //       Alert.alert('Debug', 'No token found in storage');
-  //       return;
-  //     }
-
-  //     // Make a direct API call
-  //     const response = await axios.get(
-  //       'https://humane-properly-bug.ngrok-free.app/api/tasks',
-  //       {
-  //         headers: {
-  //           'Authorization': `Bearer ${token}`,
-  //           'Content-Type': 'application/json',
-  //           'ngrok-skip-browser-warning': 'true',
-  //         },
-  //         timeout: 10000,
-  //       }
-  //     );
-
-  //     console.log('Direct API call success:', response.data);
-  //     Alert.alert('Debug Success', `Got ${response.data.data?.tasks?.length || 0} tasks`);
-  //   } catch (error: any) {
-  //     console.error('Direct API call error:', error.response?.data || error.message);
-  //     Alert.alert('Debug Error', error.response?.data?.message || error.message);
-  //   }
-  // };
-
   useEffect(() => {
     // Set greeting based on time of day
     const hour = new Date().getHours();
@@ -85,11 +50,11 @@ const HomeScreen = () => {
       // Add a small delay to ensure auth state is fully set
       const timer = setTimeout(() => {
         loadData();
-      }, 500); // Increased delay to 500ms
+      }, 500);
       
       return () => clearTimeout(timer);
     }
-  }, [user]); // Depend on user instead of empty array
+  }, [user]);
 
   const loadData = async () => {
     try {
@@ -165,85 +130,74 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <LinearGradient
-        colors={[Colors.gradientStart, Colors.gradientEnd]}
-        style={styles.headerGradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <View>
-              <Text style={styles.greeting}>{greeting}!</Text>
-              <Text style={styles.userName}>{user?.name}</Text>
-            </View>
-            <View style={styles.headerActions}>
-              {/* Debug Button */}
-              {/* <TouchableOpacity 
-                style={styles.debugButton}
-                onPress={testApiCall}
-              >
-                <Ionicons name="bug" size={20} color={Colors.textPrimary} />
-              </TouchableOpacity> */}
-              <TouchableOpacity 
-                style={styles.avatarContainer}
-                onPress={() => navigation.navigate('Profile')}
-              >
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>
-                    {user?.name?.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            </View>
+    <LinearGradient
+      colors={[Colors.gradientStart, Colors.gradientEnd]}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.greeting}>{greeting}!</Text>
+            <Text style={styles.userName}>{user?.name}</Text>
           </View>
+          <TouchableOpacity 
+            style={styles.avatarContainer}
+            onPress={() => navigation.navigate('Profile')}
+          >
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>
+                {user?.name?.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Stats Cards */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statsRow}>
-            <View style={[styles.statCard, { flex: 2 }]}>
-              <View style={styles.statContent}>
-                <Text style={styles.statLabel}>Completion Rate</Text>
-                <Text style={styles.statValue}>{completionRate}%</Text>
-                <View style={styles.progressBar}>
-                  <View 
-                    style={[
-                      styles.progressFill, 
-                      { width: `${completionRate}%` }
-                    ]} 
-                  />
-                </View>
-              </View>
-            </View>
-            <View style={styles.statCard}>
-              <View style={styles.statContent}>
-                <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
-                <Text style={styles.statValue}>{completedTasks}</Text>
-                <Text style={styles.statLabel}>Completed</Text>
+      {/* Stats Cards */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statsRow}>
+          <View style={[styles.statCard, { flex: 2 }]}>
+            <View style={styles.statContent}>
+              <Text style={styles.statLabel}>Completion Rate</Text>
+              <Text style={styles.statValue}>{completionRate}%</Text>
+              <View style={styles.progressBar}>
+                <View 
+                  style={[
+                    styles.progressFill, 
+                    { width: `${completionRate}%` }
+                  ]} 
+                />
               </View>
             </View>
           </View>
-          <View style={styles.statsRow}>
-            <View style={styles.statCard}>
-              <View style={styles.statContent}>
-                <Ionicons name="time-outline" size={24} color={Colors.warning} />
-                <Text style={styles.statValue}>{pendingTasks}</Text>
-                <Text style={styles.statLabel}>Pending</Text>
-              </View>
-            </View>
-            <View style={styles.statCard}>
-              <View style={styles.statContent}>
-                <Ionicons name="alert-circle" size={24} color={Colors.error} />
-                <Text style={styles.statValue}>{overdueTasks}</Text>
-                <Text style={styles.statLabel}>Overdue</Text>
-              </View>
+          <View style={styles.statCard}>
+            <View style={styles.statContent}>
+              <Ionicons name="checkmark-circle" size={24} color={Colors.success} />
+              <Text style={styles.statValue}>{completedTasks}</Text>
+              <Text style={styles.statLabel}>Completed</Text>
             </View>
           </View>
         </View>
-      </LinearGradient>
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <View style={styles.statContent}>
+              <Ionicons name="time-outline" size={24} color={Colors.warning} />
+              <Text style={styles.statValue}>{pendingTasks}</Text>
+              <Text style={styles.statLabel}>Pending</Text>
+            </View>
+          </View>
+          <View style={styles.statCard}>
+            <View style={styles.statContent}>
+              <Ionicons name="alert-circle" size={24} color={Colors.error} />
+              <Text style={styles.statValue}>{overdueTasks}</Text>
+              <Text style={styles.statLabel}>Overdue</Text>
+            </View>
+          </View>
+        </View>
+      </View>
 
       {/* Scrollable Content */}
       <ScrollView 
@@ -253,8 +207,8 @@ const HomeScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={Colors.primary}
-            colors={[Colors.primary]}
+            tintColor={Colors.textPrimary}
+            colors={[Colors.textPrimary]}
           />
         }
       >
@@ -266,25 +220,18 @@ const HomeScreen = () => {
               style={styles.quickActionCard}
               onPress={() => navigation.navigate('CreateTask')}
             >
-              <LinearGradient
-                colors={[Colors.primary, Colors.primaryDark]}
-                style={styles.quickActionGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
+              <View style={styles.quickActionContent}>
                 <Ionicons name="add" size={28} color={Colors.textPrimary} />
                 <Text style={styles.quickActionText}>New Task</Text>
-              </LinearGradient>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.quickActionCard}
               onPress={() => navigation.navigate('Tasks')}
             >
               <View style={styles.quickActionContent}>
-                <Ionicons name="list" size={28} color={Colors.primary} />
-                <Text style={[styles.quickActionText, { color: Colors.textDark }]}>
-                  All Tasks
-                </Text>
+                <Ionicons name="list" size={28} color={Colors.textPrimary} />
+                <Text style={styles.quickActionText}>All Tasks</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -427,20 +374,16 @@ const HomeScreen = () => {
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
-  },
-  headerGradient: {
-    paddingTop: 60,
-    paddingBottom: Spacing.lg,
   },
   header: {
+    paddingTop: 60,
     paddingHorizontal: Spacing.lg,
     marginBottom: Spacing.lg,
   },
@@ -449,23 +392,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.sm,
-  },
-  debugButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   greeting: {
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
-    opacity: 0.9,
   },
   userName: {
     fontSize: FontSizes.xxl,
@@ -495,6 +424,7 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
   },
   statsRow: {
     flexDirection: 'row',
@@ -537,7 +467,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   section: {
     paddingHorizontal: Spacing.lg,
@@ -556,8 +485,9 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     fontSize: FontSizes.sm,
-    color: Colors.primary,
+    color: Colors.textPrimary,
     fontWeight: FontWeights.medium,
+    opacity: 0.9,
   },
   quickActionsRow: {
     flexDirection: 'row',
@@ -569,14 +499,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...Shadows.medium,
   },
-  quickActionGradient: {
-    padding: Spacing.lg,
-    alignItems: 'center',
-  },
   quickActionContent: {
     padding: Spacing.lg,
     alignItems: 'center',
-    backgroundColor: Colors.textPrimary,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   quickActionText: {
     fontSize: FontSizes.md,
@@ -654,7 +580,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   createFirstTaskButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,

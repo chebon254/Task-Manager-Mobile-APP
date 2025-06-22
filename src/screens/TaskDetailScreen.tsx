@@ -1,31 +1,43 @@
-import { Ionicons } from '@expo/vector-icons';
-import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    Share,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { Task, useTask } from '../context/TaskContext';
-import { BorderRadius, Colors, FontSizes, FontWeights, Shadows, Spacing } from '../theme/colors';
-import { AllScreensParamList } from '../types/navigation';
+  NavigationProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Share,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Task, useTask } from "../context/TaskContext";
+import {
+  BorderRadius,
+  Colors,
+  FontSizes,
+  FontWeights,
+  Shadows,
+  Spacing,
+} from "../theme/colors";
+import { AllScreensParamList } from "../types/navigation";
 
 type YourScreenNavigationProp = NavigationProp<AllScreensParamList>;
 
-type TaskStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED';
+// Fixed to include all possible status values from the API
+type TaskStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
 const TaskDetailScreen = () => {
   const navigation = useNavigation<YourScreenNavigationProp>();
   const route = useRoute();
   const { taskId } = route.params as { taskId: string };
-  
+
   const { tasks, updateTask, deleteTask } = useTask();
   const [task, setTask] = useState<Task | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +48,7 @@ const TaskDetailScreen = () => {
   }, [taskId, tasks]);
 
   const loadTask = () => {
-    const foundTask = tasks.find(t => t.id === taskId);
+    const foundTask = tasks.find((t) => t.id === taskId);
     setTask(foundTask || null);
     setIsLoading(false);
   };
@@ -49,7 +61,7 @@ const TaskDetailScreen = () => {
       await updateTask(task.id, { status: newStatus });
       setTask({ ...task, status: newStatus });
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update task');
+      Alert.alert("Error", error.message || "Failed to update task");
     } finally {
       setIsUpdating(false);
     }
@@ -57,15 +69,15 @@ const TaskDetailScreen = () => {
 
   const handleDeleteTask = () => {
     Alert.alert(
-      'Delete Task',
-      'Are you sure you want to delete this task? This action cannot be undone.',
+      "Delete Task",
+      "Are you sure you want to delete this task? This action cannot be undone.",
       [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: confirmDelete 
-        }
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: confirmDelete,
+        },
       ]
     );
   };
@@ -78,7 +90,7 @@ const TaskDetailScreen = () => {
       await deleteTask(task.id);
       navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to delete task');
+      Alert.alert("Error", error.message || "Failed to delete task");
       setIsUpdating(false);
     }
   };
@@ -87,44 +99,50 @@ const TaskDetailScreen = () => {
     if (!task) return;
 
     try {
-      const shareContent = `Task: ${task.title}\n${task.description ? `Description: ${task.description}\n` : ''}Status: ${task.status}\nCategory: ${task.category.name}${task.dueDate ? `\nDue: ${formatDate(task.dueDate)}` : ''}`;
-      
+      const shareContent = `Task: ${task.title}\n${
+        task.description ? `Description: ${task.description}\n` : ""
+      }Status: ${task.status}\nCategory: ${task.category.name}${
+        task.dueDate ? `\nDue: ${formatDate(task.dueDate)}` : ""
+      }`;
+
       await Share.share({
         message: shareContent,
         title: task.title,
       });
     } catch (error) {
-      console.error('Error sharing task:', error);
+      console.error("Error sharing task:", error);
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
-      case 'COMPLETED':
+      case "COMPLETED":
         return Colors.success;
-      case 'CANCELLED':
+      case "CANCELLED":
         return Colors.error;
+      case "IN_PROGRESS":
+        return Colors.info;
       default:
         return Colors.warning;
     }
@@ -132,17 +150,19 @@ const TaskDetailScreen = () => {
 
   const getStatusIcon = (status: TaskStatus) => {
     switch (status) {
-      case 'COMPLETED':
-        return 'checkmark-circle';
-      case 'CANCELLED':
-        return 'close-circle';
+      case "COMPLETED":
+        return "checkmark-circle";
+      case "CANCELLED":
+        return "close-circle";
+      case "IN_PROGRESS":
+        return "play-circle";
       default:
-        return 'time-outline';
+        return "time-outline";
     }
   };
 
   const isOverdue = (task: Task) => {
-    if (!task.dueDate || task.status === 'COMPLETED') return false;
+    if (!task.dueDate || task.status === "COMPLETED") return false;
     return new Date(task.dueDate) < new Date();
   };
 
@@ -156,16 +176,30 @@ const TaskDetailScreen = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={Colors.primary} />
-      </View>
+      <LinearGradient
+        colors={[Colors.gradientStart, Colors.gradientEnd]}
+        style={styles.loadingContainer}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <ActivityIndicator size="large" color={Colors.textPrimary} />
+      </LinearGradient>
     );
   }
 
   if (!task) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={64} color={Colors.error} />
+      <LinearGradient
+        colors={[Colors.gradientStart, Colors.gradientEnd]}
+        style={styles.errorContainer}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <Ionicons
+          name="alert-circle-outline"
+          size={64}
+          color={Colors.textSecondary}
+        />
         <Text style={styles.errorTitle}>Task Not Found</Text>
         <Text style={styles.errorSubtitle}>
           The task you're looking for doesn't exist or has been deleted.
@@ -176,60 +210,70 @@ const TaskDetailScreen = () => {
         >
           <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.gradientStart} />
-      
+    <LinearGradient
+      colors={[Colors.gradientStart, Colors.gradientEnd]}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={Colors.gradientStart}
+      />
+
       {/* Header */}
-      <LinearGradient
-        colors={[Colors.gradientStart, Colors.gradientEnd]}
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
+      <View style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.headerButton}
             onPress={() => navigation.goBack()}
           >
             <Ionicons name="arrow-back" size={24} color={Colors.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Task Details</Text>
-          <TouchableOpacity 
-            style={styles.headerButton}
-            onPress={shareTask}
-          >
-            <Ionicons name="share-outline" size={24} color={Colors.textPrimary} />
+          <TouchableOpacity style={styles.headerButton} onPress={shareTask}>
+            <Ionicons
+              name="share-outline"
+              size={24}
+              color={Colors.textPrimary}
+            />
           </TouchableOpacity>
         </View>
-      </LinearGradient>
+      </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Task Title */}
         <View style={styles.titleSection}>
-          <Text style={[
-            styles.taskTitle,
-            task.status === 'COMPLETED' && styles.completedTitle
-          ]}>
+          <Text
+            style={[
+              styles.taskTitle,
+              task.status === "COMPLETED" && styles.completedTitle,
+            ]}
+          >
             {task.title}
           </Text>
-          
+
           {/* Status Badge */}
-          <View style={[
-            styles.statusBadge,
-            { backgroundColor: getStatusColor(task.status) }
-          ]}>
-            <Ionicons 
-              name={getStatusIcon(task.status)} 
-              size={16} 
-              color={Colors.textPrimary} 
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: getStatusColor(task.status) },
+            ]}
+          >
+            <Ionicons
+              name={getStatusIcon(task.status)}
+              size={16}
+              color={Colors.textPrimary}
             />
             <Text style={styles.statusText}>
-              {task.status.charAt(0) + task.status.slice(1).toLowerCase()}
+              {task.status === "IN_PROGRESS"
+                ? "In Progress"
+                : task.status.charAt(0) + task.status.slice(1).toLowerCase()}
             </Text>
           </View>
         </View>
@@ -237,11 +281,11 @@ const TaskDetailScreen = () => {
         {/* Category */}
         <View style={styles.categorySection}>
           <View style={styles.categoryInfo}>
-            <View 
+            <View
               style={[
-                styles.categoryDot, 
-                { backgroundColor: task.category.color }
-              ]} 
+                styles.categoryDot,
+                { backgroundColor: task.category.color },
+              ]}
             />
             <Text style={styles.categoryName}>{task.category.name}</Text>
           </View>
@@ -251,42 +295,49 @@ const TaskDetailScreen = () => {
         {task.dueDate && (
           <View style={styles.dueDateSection}>
             <View style={styles.dueDateInfo}>
-              <Ionicons 
-                name="calendar-outline" 
-                size={20} 
-                color={isOverdue(task) ? Colors.error : Colors.primary} 
+              <Ionicons
+                name="calendar-outline"
+                size={20}
+                color={isOverdue(task) ? Colors.error : Colors.textPrimary}
               />
               <View style={styles.dueDateText}>
-                <Text style={[
-                  styles.dueDateTitle,
-                  isOverdue(task) && { color: Colors.error }
-                ]}>
+                <Text
+                  style={[
+                    styles.dueDateTitle,
+                    isOverdue(task) && { color: Colors.error },
+                  ]}
+                >
                   Due Date
                 </Text>
-                <Text style={[
-                  styles.dueDateValue,
-                  isOverdue(task) && { color: Colors.error }
-                ]}>
+                <Text
+                  style={[
+                    styles.dueDateValue,
+                    isOverdue(task) && { color: Colors.error },
+                  ]}
+                >
                   {formatDate(task.dueDate)}
                 </Text>
-                {task.status === 'PENDING' && (
-                  <Text style={[
-                    styles.dueDateHelper,
-                    isOverdue(task) && { color: Colors.error }
-                  ]}>
-                    {isOverdue(task) 
-                      ? `Overdue by ${Math.abs(getDaysUntilDue(task.dueDate))} days`
-                      : getDaysUntilDue(task.dueDate) === 0 
-                      ? 'Due today'
+                {task.status === "PENDING" && (
+                  <Text
+                    style={[
+                      styles.dueDateHelper,
+                      isOverdue(task) && { color: Colors.error },
+                    ]}
+                  >
+                    {isOverdue(task)
+                      ? `Overdue by ${Math.abs(
+                          getDaysUntilDue(task.dueDate)
+                        )} days`
+                      : getDaysUntilDue(task.dueDate) === 0
+                      ? "Due today"
                       : getDaysUntilDue(task.dueDate) === 1
-                      ? 'Due tomorrow'
-                      : `${getDaysUntilDue(task.dueDate)} days remaining`
-                    }
+                      ? "Due tomorrow"
+                      : `${getDaysUntilDue(task.dueDate)} days remaining`}
                   </Text>
                 )}
               </View>
             </View>
-            {isOverdue(task) && task.status === 'PENDING' && (
+            {isOverdue(task) && task.status === "PENDING" && (
               <Ionicons name="alert-circle" size={24} color={Colors.error} />
             )}
           </View>
@@ -304,52 +355,97 @@ const TaskDetailScreen = () => {
         <View style={styles.timestampsSection}>
           <Text style={styles.sectionTitle}>Task Information</Text>
           <View style={styles.timestampRow}>
-            <Ionicons name="add-circle-outline" size={16} color={Colors.textSecondary} />
+            <Ionicons
+              name="add-circle-outline"
+              size={16}
+              color={Colors.textSecondary}
+            />
             <Text style={styles.timestampLabel}>Created:</Text>
-            <Text style={styles.timestampValue}>{formatDateTime(task.createdAt)}</Text>
+            <Text style={styles.timestampValue}>
+              {formatDateTime(task.createdAt)}
+            </Text>
           </View>
           <View style={styles.timestampRow}>
-            <Ionicons name="create-outline" size={16} color={Colors.textSecondary} />
+            <Ionicons
+              name="create-outline"
+              size={16}
+              color={Colors.textSecondary}
+            />
             <Text style={styles.timestampLabel}>Updated:</Text>
-            <Text style={styles.timestampValue}>{formatDateTime(task.updatedAt)}</Text>
+            <Text style={styles.timestampValue}>
+              {formatDateTime(task.updatedAt)}
+            </Text>
           </View>
         </View>
 
         {/* Quick Actions */}
         <View style={styles.actionsSection}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
-          
+
           {/* Status Actions */}
           <View style={styles.statusActions}>
-            {task.status !== 'COMPLETED' && (
+            {task.status !== "COMPLETED" && (
               <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: Colors.success }]}
-                onPress={() => handleStatusChange('COMPLETED')}
+                style={[
+                  styles.actionButton,
+                  { backgroundColor: Colors.success },
+                ]}
+                onPress={() => handleStatusChange("COMPLETED")}
                 disabled={isUpdating}
               >
-                <Ionicons name="checkmark-circle" size={20} color={Colors.textPrimary} />
+                <Ionicons
+                  name="checkmark-circle"
+                  size={20}
+                  color={Colors.textPrimary}
+                />
                 <Text style={styles.actionButtonText}>Mark Complete</Text>
               </TouchableOpacity>
             )}
-            
-            {task.status !== 'PENDING' && (
+
+            {task.status !== "IN_PROGRESS" && (
               <TouchableOpacity
-                style={[styles.actionButton, { backgroundColor: Colors.warning }]}
-                onPress={() => handleStatusChange('PENDING')}
+                style={[styles.actionButton, { backgroundColor: Colors.info }]}
+                onPress={() => handleStatusChange("IN_PROGRESS")}
                 disabled={isUpdating}
               >
-                <Ionicons name="time-outline" size={20} color={Colors.textPrimary} />
+                <Ionicons
+                  name="play-circle"
+                  size={20}
+                  color={Colors.textPrimary}
+                />
+                <Text style={styles.actionButtonText}>Mark In Progress</Text>
+              </TouchableOpacity>
+            )}
+
+            {task.status !== "PENDING" && (
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  { backgroundColor: Colors.warning },
+                ]}
+                onPress={() => handleStatusChange("PENDING")}
+                disabled={isUpdating}
+              >
+                <Ionicons
+                  name="time-outline"
+                  size={20}
+                  color={Colors.textPrimary}
+                />
                 <Text style={styles.actionButtonText}>Mark Pending</Text>
               </TouchableOpacity>
             )}
-            
-            {task.status !== 'CANCELLED' && (
+
+            {task.status !== "CANCELLED" && (
               <TouchableOpacity
                 style={[styles.actionButton, { backgroundColor: Colors.error }]}
-                onPress={() => handleStatusChange('CANCELLED')}
+                onPress={() => handleStatusChange("CANCELLED")}
                 disabled={isUpdating}
               >
-                <Ionicons name="close-circle" size={20} color={Colors.textPrimary} />
+                <Ionicons
+                  name="close-circle"
+                  size={20}
+                  color={Colors.textPrimary}
+                />
                 <Text style={styles.actionButtonText}>Cancel Task</Text>
               </TouchableOpacity>
             )}
@@ -376,27 +472,24 @@ const TaskDetailScreen = () => {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
+    justifyContent: "center",
+    alignItems: "center",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: Spacing.lg,
-    backgroundColor: Colors.background,
   },
   errorTitle: {
     fontSize: FontSizes.xl,
@@ -408,12 +501,12 @@ const styles = StyleSheet.create({
   errorSubtitle: {
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 22,
     marginBottom: Spacing.xl,
   },
   backButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
@@ -430,22 +523,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
   headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   headerButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: FontSizes.xl,
     color: Colors.textPrimary,
     fontWeight: FontWeights.semibold,
+    marginTop: Spacing.sm, // Added margin-top as requested
   },
   content: {
     flex: 1,
@@ -463,13 +557,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   completedTitle: {
-    textDecorationLine: 'line-through',
+    textDecorationLine: "line-through",
     opacity: 0.7,
   },
   statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.md,
@@ -486,8 +580,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   categoryInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.sm,
   },
   categoryDot: {
@@ -501,16 +595,16 @@ const styles = StyleSheet.create({
     fontWeight: FontWeights.medium,
   },
   dueDateSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: Spacing.lg,
     backgroundColor: Colors.backgroundCard,
     marginBottom: Spacing.sm,
   },
   dueDateInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.md,
   },
   dueDateText: {
@@ -553,8 +647,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   timestampRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: Spacing.xs,
     gap: Spacing.sm,
   },
@@ -577,9 +671,9 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
     gap: Spacing.sm,
@@ -595,15 +689,14 @@ const styles = StyleSheet.create({
   },
   footer: {
     padding: Spacing.lg,
-    backgroundColor: Colors.background,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
   },
   deleteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
     borderWidth: 1,
     borderColor: Colors.error,
     paddingVertical: Spacing.md,

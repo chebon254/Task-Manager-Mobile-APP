@@ -83,16 +83,17 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <LinearGradient
+      colors={[Colors.gradientStart, Colors.gradientEnd]}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
     >
       <StatusBar barStyle="light-content" backgroundColor={Colors.gradientStart} />
-      <LinearGradient
-        colors={[Colors.gradientStart, Colors.gradientEnd]}
-        style={styles.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+      
+      <KeyboardAvoidingView 
+        style={styles.keyboardView} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView 
           contentContainerStyle={styles.scrollContent}
@@ -111,7 +112,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
           <View style={styles.header}>
             <View style={styles.logoContainer}>
               <View style={styles.logoIcon}>
-                <Ionicons name="person-add-outline" size={30} color={Colors.primary} />
+                <Ionicons name="person-add-outline" size={30} color={Colors.textPrimary} />
               </View>
             </View>
             <Text style={styles.title}>Create Account</Text>
@@ -264,12 +265,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               onPress={handleRegister}
               disabled={isLoading}
             >
-              <LinearGradient
-                colors={['#FFFFFF', '#F8FAFC']}
-                style={styles.buttonGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
+              <View style={styles.buttonContent}>
                 {isLoading ? (
                   <ActivityIndicator size="small" color={Colors.primary} />
                 ) : (
@@ -278,7 +274,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                     <Ionicons name="arrow-forward" size={20} color={Colors.primary} />
                   </>
                 )}
-              </LinearGradient>
+              </View>
             </TouchableOpacity>
 
             {/* Sign In Link */}
@@ -290,8 +286,8 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
             </View>
           </View>
         </ScrollView>
-      </LinearGradient>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 };
 
@@ -299,7 +295,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  gradient: {
+  keyboardView: {
     flex: 1,
   },
   scrollContent: {
@@ -340,7 +336,6 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
     textAlign: 'center',
-    opacity: 0.9,
   },
   formContainer: {
     flex: 1,
@@ -389,6 +384,7 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.xs,
   },
   registerButton: {
+    backgroundColor: Colors.textPrimary,
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
     ...Shadows.medium,
@@ -397,7 +393,7 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.7,
   },
-  buttonGradient: {
+  buttonContent: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',

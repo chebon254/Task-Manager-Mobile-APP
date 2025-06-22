@@ -70,16 +70,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <LinearGradient
+      colors={[Colors.gradientStart, Colors.gradientEnd]}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
     >
       <StatusBar barStyle="light-content" backgroundColor={Colors.gradientStart} />
-      <LinearGradient
-        colors={[Colors.gradientStart, Colors.gradientEnd]}
-        style={styles.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+      
+      <KeyboardAvoidingView 
+        style={styles.keyboardView} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView 
           contentContainerStyle={styles.scrollContent}
@@ -90,7 +91,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <View style={styles.header}>
             <View style={styles.logoContainer}>
               <View style={styles.logoIcon}>
-                <Ionicons name="checkmark" size={30} color={Colors.primary} />
+                <Ionicons name="checkmark" size={30} color={Colors.textPrimary} />
               </View>
             </View>
             <Text style={styles.title}>Welcome Back!</Text>
@@ -184,12 +185,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               onPress={handleLogin}
               disabled={isLoading}
             >
-              <LinearGradient
-                colors={['#FFFFFF', '#F8FAFC']}
-                style={styles.buttonGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
+              <View style={styles.buttonContent}>
                 {isLoading ? (
                   <ActivityIndicator size="small" color={Colors.primary} />
                 ) : (
@@ -198,7 +194,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                     <Ionicons name="arrow-forward" size={20} color={Colors.primary} />
                   </>
                 )}
-              </LinearGradient>
+              </View>
             </TouchableOpacity>
 
             {/* Divider */}
@@ -217,8 +213,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </View>
           </View>
         </ScrollView>
-      </LinearGradient>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 };
 
@@ -226,7 +222,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  gradient: {
+  keyboardView: {
     flex: 1,
   },
   scrollContent: {
@@ -262,7 +258,6 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
     textAlign: 'center',
-    opacity: 0.9,
   },
   errorContainer: {
     flexDirection: 'row',
@@ -320,6 +315,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   loginButton: {
+    backgroundColor: Colors.textPrimary,
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
     ...Shadows.medium,
@@ -328,7 +324,7 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.7,
   },
-  buttonGradient: {
+  buttonContent: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',

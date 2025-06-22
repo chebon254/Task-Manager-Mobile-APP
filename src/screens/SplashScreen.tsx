@@ -27,7 +27,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   const titleTranslateY = useRef(new Animated.Value(30)).current;
   const subtitleOpacity = useRef(new Animated.Value(0)).current;
   const subtitleTranslateY = useRef(new Animated.Value(30)).current;
-  const backgroundOpacity = useRef(new Animated.Value(0)).current;
   
   // Loading dots animations
   const dot1Scale = useRef(new Animated.Value(0.5)).current;
@@ -76,14 +75,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 
     // Main animation sequence
     animationSequence = Animated.sequence([
-      // Fade in background
-      Animated.timing(backgroundOpacity, {
-        toValue: 1,
-        duration: 600,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      
       Animated.delay(200),
       
       // Logo entrance
@@ -152,7 +143,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
     animationTimeout = setTimeout(() => {
       dotsAnimation.stop();
       handleFinish();
-    }, 3500); // Total animation time
+    }, 3500);
 
     // Cleanup function
     return () => {
@@ -167,7 +158,6 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
       }
     };
   }, [
-    backgroundOpacity,
     logoScale,
     logoOpacity,
     logoRotation,
@@ -187,110 +177,95 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   });
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={[Colors.gradientStart, Colors.gradientEnd]}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       <StatusBar barStyle="light-content" backgroundColor={Colors.gradientStart} />
       
-      <Animated.View 
-        style={[
-          styles.gradientContainer,
-          { opacity: backgroundOpacity }
-        ]}
-      >
-        <LinearGradient
-          colors={[Colors.gradientStart, Colors.gradientEnd]}
-          style={styles.gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+      <View style={styles.content}>
+        {/* Animated Logo */}
+        <Animated.View
+          style={[
+            styles.logoContainer,
+            {
+              transform: [
+                { scale: logoScale },
+                { rotate: logoRotationInterpolated }
+              ],
+              opacity: logoOpacity,
+            },
+          ]}
         >
-          <View style={styles.content}>
-            {/* Animated Logo */}
-            <Animated.View
-              style={[
-                styles.logoContainer,
-                {
-                  transform: [
-                    { scale: logoScale },
-                    { rotate: logoRotationInterpolated }
-                  ],
-                  opacity: logoOpacity,
-                },
-              ]}
-            >
-              <View style={styles.logoIcon}>
-                <Ionicons name="checkmark-circle" size={50} color={Colors.textPrimary} />
-              </View>
-            </Animated.View>
-
-            {/* Animated App Title */}
-            <Animated.Text
-              style={[
-                styles.title,
-                {
-                  opacity: titleOpacity,
-                  transform: [{ translateY: titleTranslateY }],
-                },
-              ]}
-            >
-              TaskMaster
-            </Animated.Text>
-
-            {/* Animated Subtitle */}
-            <Animated.Text
-              style={[
-                styles.subtitle,
-                {
-                  opacity: subtitleOpacity,
-                  transform: [{ translateY: subtitleTranslateY }],
-                },
-              ]}
-            >
-              Organize your life, one task at a time
-            </Animated.Text>
-
-            {/* Animated Loading Dots */}
-            <Animated.View
-              style={[
-                styles.loadingContainer,
-                { opacity: subtitleOpacity },
-              ]}
-            >
-              <View style={styles.loadingDots}>
-                <Animated.View 
-                  style={[
-                    styles.dot, 
-                    { transform: [{ scale: dot1Scale }] }
-                  ]} 
-                />
-                <Animated.View 
-                  style={[
-                    styles.dot, 
-                    { transform: [{ scale: dot2Scale }] }
-                  ]} 
-                />
-                <Animated.View 
-                  style={[
-                    styles.dot, 
-                    { transform: [{ scale: dot3Scale }] }
-                  ]} 
-                />
-              </View>
-              <Text style={styles.loadingText}>Loading...</Text>
-            </Animated.View>
+          <View style={styles.logoIcon}>
+            <Ionicons name="checkmark-circle" size={50} color={Colors.textPrimary} />
           </View>
-        </LinearGradient>
-      </Animated.View>
-    </View>
+        </Animated.View>
+
+        {/* Animated App Title */}
+        <Animated.Text
+          style={[
+            styles.title,
+            {
+              opacity: titleOpacity,
+              transform: [{ translateY: titleTranslateY }],
+            },
+          ]}
+        >
+          TaskMaster
+        </Animated.Text>
+
+        {/* Animated Subtitle */}
+        <Animated.Text
+          style={[
+            styles.subtitle,
+            {
+              opacity: subtitleOpacity,
+              transform: [{ translateY: subtitleTranslateY }],
+            },
+          ]}
+        >
+          Organize your life, one task at a time
+        </Animated.Text>
+
+        {/* Animated Loading Dots */}
+        <Animated.View
+          style={[
+            styles.loadingContainer,
+            { opacity: subtitleOpacity },
+          ]}
+        >
+          <View style={styles.loadingDots}>
+            <Animated.View 
+              style={[
+                styles.dot, 
+                { transform: [{ scale: dot1Scale }] }
+              ]} 
+            />
+            <Animated.View 
+              style={[
+                styles.dot, 
+                { transform: [{ scale: dot2Scale }] }
+              ]} 
+            />
+            <Animated.View 
+              style={[
+                styles.dot, 
+                { transform: [{ scale: dot3Scale }] }
+              ]} 
+            />
+          </View>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </Animated.View>
+      </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  gradientContainer: {
-    flex: 1,
-  },
-  gradient: {
     flex: 1,
   },
   content: {
@@ -330,7 +305,6 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.lg,
     color: Colors.textSecondary,
     textAlign: 'center',
-    opacity: 0.95,
     lineHeight: 26,
     marginBottom: Spacing.xxl,
     paddingHorizontal: Spacing.md,
@@ -355,7 +329,6 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
-    opacity: 0.8,
     fontWeight: FontWeights.medium,
   },
 });
