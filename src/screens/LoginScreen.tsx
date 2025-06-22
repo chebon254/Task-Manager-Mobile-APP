@@ -111,7 +111,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </View>
             <Text style={styles.title}>Welcome Back!</Text>
             <Text style={styles.subtitle}>
-              Sign in to continue to TaskMaster
+              Sign in to continue to Powwater
             </Text>
           </View>
 

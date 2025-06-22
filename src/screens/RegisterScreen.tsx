@@ -116,7 +116,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               </View>
             </View>
             <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join TaskMaster and start organizing your tasks</Text>
+            <Text style={styles.subtitle}>Join Powwater and start organizing your tasks</Text>
           </View>
 
           {/* Register Form */}

@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator, StyleSheet, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 // Context Providers
@@ -37,6 +37,7 @@ import {
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const MainTabs = createBottomTabNavigator<MainTabParamList>();
 const RootStack = createNativeStackNavigator<RootStackParamList>();
+const { width } = Dimensions.get("window");
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -69,7 +70,7 @@ const AuthNavigator = () => {
   );
 };
 
-// Main Tab Navigator
+// Updated Tab Navigator with floating style
 const TabNavigator = () => {
   return (
     <MainTabs.Navigator
@@ -90,20 +91,33 @@ const TabNavigator = () => {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textSecondary,
+        tabBarActiveTintColor: "#340f45", // Your specified color
+        tabBarInactiveTintColor: "rgba(52, 15, 69, 0.4)", // Lighter version of your color
         tabBarStyle: {
-          backgroundColor: Colors.backgroundCard,
-          borderTopColor: Colors.border,
-          borderTopWidth: 1,
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 60,
+          position: "absolute",
+          bottom: 30,
+          backgroundColor: Colors.textPrimary,
+          borderTopColor: "transparent",
+          borderTopWidth: 0,
+          borderRadius: 20,
+          paddingBottom: 16,
+          paddingTop: 16,
+          height: 76,
+          // Proper centering approach for React Navigation v6+
+          marginHorizontal: 20, // This creates equal margins on both sides
+          // Remove width and left calculations - let marginHorizontal handle it
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 8,
+          elevation: 10,
+          borderWidth: 0,
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "500",
         },
+        tabBarBackground: () => null,
       })}
     >
       <MainTabs.Screen
@@ -224,5 +238,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  // Add this to containers that need to avoid the floating tab bar
+  screenContainer: {
+    flex: 1,
+    paddingBottom: 76, // 60px tab height + 8px bottom margin + 8px extra spacing
+  },
+
+  // For scrollable content, add this to contentContainerStyle
+  scrollViewContent: {
+    paddingBottom: 76, // Same as above
+  },
+
+  // For FlatList components
+  flatListContent: {
+    paddingBottom: 76,
   },
 });
