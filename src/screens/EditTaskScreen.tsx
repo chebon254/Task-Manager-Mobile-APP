@@ -1,42 +1,54 @@
-import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { NavigationProp, useNavigation, useRoute } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import React, { useEffect, useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
-import { Task, useTask } from '../context/TaskContext';
-import { BorderRadius, Colors, FontSizes, FontWeights, Shadows, Spacing } from '../theme/colors';
-import { AllScreensParamList } from '../types/navigation';
+  NavigationProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Task, useTask } from "../context/TaskContext";
+import {
+  BorderRadius,
+  Colors,
+  FontSizes,
+  FontWeights,
+  Shadows,
+  Spacing,
+} from "../theme/colors";
+import { AllScreensParamList } from "../types/navigation";
 
 type EditTaskScreenNavigationProp = NavigationProp<AllScreensParamList>;
 
-type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+type TaskStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
 const EditTaskScreen = () => {
   const navigation = useNavigation<EditTaskScreenNavigationProp>();
   const route = useRoute();
   const { taskId } = route.params as { taskId: string };
-  
-  const { tasks, categories, updateTask, fetchCategories, isLoading } = useTask();
+
+  const { tasks, categories, updateTask, fetchCategories, isLoading } =
+    useTask();
 
   const [task, setTask] = useState<Task | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
-  const [status, setStatus] = useState<TaskStatus>('PENDING');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+  const [status, setStatus] = useState<TaskStatus>("PENDING");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,7 +62,7 @@ const EditTaskScreen = () => {
     if (foundTask) {
       setTask(foundTask);
       setTitle(foundTask.title);
-      setDescription(foundTask.description || '');
+      setDescription(foundTask.description || "");
       setDueDate(foundTask.dueDate ? new Date(foundTask.dueDate) : null);
       setSelectedCategoryId(foundTask.categoryId);
       setStatus(foundTask.status);
@@ -61,24 +73,24 @@ const EditTaskScreen = () => {
     try {
       await fetchCategories();
     } catch (error) {
-      console.error('Error loading categories:', error);
+      console.error("Error loading categories:", error);
     }
   };
 
   const handleUpdateTask = async () => {
     if (!title.trim()) {
-      Alert.alert('Error', 'Please enter a task title');
+      Alert.alert("Error", "Please enter a task title");
       return;
     }
 
     if (!selectedCategoryId) {
-      Alert.alert('Error', 'Please select a category');
+      Alert.alert("Error", "Please select a category");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      
+
       await updateTask(taskId, {
         title: title.trim(),
         description: description.trim() || undefined,
@@ -87,18 +99,18 @@ const EditTaskScreen = () => {
         categoryId: selectedCategoryId,
       });
 
-      Alert.alert('Success', 'Task updated successfully!', [
-        { text: 'OK', onPress: () => navigation.goBack() }
+      Alert.alert("Success", "Task updated successfully!", [
+        { text: "OK", onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to update task');
+      Alert.alert("Error", error.message || "Failed to update task");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const onDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
+    setShowDatePicker(Platform.OS === "ios");
     if (selectedDate) {
       setDueDate(selectedDate);
     }
@@ -109,21 +121,21 @@ const EditTaskScreen = () => {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const getStatusColor = (taskStatus: TaskStatus) => {
     switch (taskStatus) {
-      case 'COMPLETED':
+      case "COMPLETED":
         return Colors.success;
-      case 'CANCELLED':
+      case "CANCELLED":
         return Colors.error;
-      case 'IN_PROGRESS':
+      case "IN_PROGRESS":
         return Colors.info;
       default:
         return Colors.warning;
@@ -132,19 +144,19 @@ const EditTaskScreen = () => {
 
   const getStatusIcon = (taskStatus: TaskStatus) => {
     switch (taskStatus) {
-      case 'COMPLETED':
-        return 'checkmark-circle';
-      case 'CANCELLED':
-        return 'close-circle';
-      case 'IN_PROGRESS':
-        return 'play-circle';
+      case "COMPLETED":
+        return "checkmark-circle";
+      case "CANCELLED":
+        return "close-circle";
+      case "IN_PROGRESS":
+        return "play-circle";
       default:
-        return 'time-outline';
+        return "time-outline";
     }
   };
 
   const handleCreateCategory = () => {
-    navigation.navigate('CreateCategory');
+    navigation.navigate("CreateCategory");
   };
 
   if (!task) {
@@ -161,12 +173,15 @@ const EditTaskScreen = () => {
   }
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <StatusBar barStyle="light-content" backgroundColor={Colors.gradientStart} />
-      
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={Colors.gradientStart}
+      />
+
       {/* Header */}
       <LinearGradient
         colors={[Colors.gradientStart, Colors.gradientEnd]}
@@ -175,7 +190,7 @@ const EditTaskScreen = () => {
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.headerContent}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.closeButton}
             onPress={() => navigation.goBack()}
           >
@@ -186,7 +201,7 @@ const EditTaskScreen = () => {
         </View>
       </LinearGradient>
 
-      <ScrollView 
+      <ScrollView
         style={styles.content}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
@@ -228,7 +243,7 @@ const EditTaskScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Category</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.addCategoryButton}
               onPress={handleCreateCategory}
             >
@@ -236,24 +251,30 @@ const EditTaskScreen = () => {
               <Text style={styles.addCategoryText}>Add Category</Text>
             </TouchableOpacity>
           </View>
-          
+
           {categories.length === 0 ? (
             <View style={styles.noCategoriesContainer}>
-              <Ionicons name="folder-outline" size={48} color={Colors.textSecondary} />
+              <Ionicons
+                name="folder-outline"
+                size={48}
+                color={Colors.textSecondary}
+              />
               <Text style={styles.noCategoriesTitle}>No Categories Yet</Text>
               <Text style={styles.noCategoriesSubtitle}>
                 Create your first category to organize your tasks
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.createFirstCategoryButton}
                 onPress={handleCreateCategory}
               >
-                <Text style={styles.createFirstCategoryText}>Create Category</Text>
+                <Text style={styles.createFirstCategoryText}>
+                  Create Category
+                </Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <ScrollView 
-              horizontal 
+            <ScrollView
+              horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.categoriesContainer}
             >
@@ -262,27 +283,31 @@ const EditTaskScreen = () => {
                   key={category.id}
                   style={[
                     styles.categoryCard,
-                    selectedCategoryId === category.id && styles.selectedCategoryCard
+                    selectedCategoryId === category.id &&
+                      styles.selectedCategoryCard,
                   ]}
                   onPress={() => setSelectedCategoryId(category.id)}
                 >
-                  <View 
+                  <View
                     style={[
-                      styles.categoryColor, 
-                      { backgroundColor: category.color }
-                    ]} 
+                      styles.categoryColor,
+                      { backgroundColor: category.color },
+                    ]}
                   />
-                  <Text style={[
-                    styles.categoryText,
-                    selectedCategoryId === category.id && styles.selectedCategoryText
-                  ]}>
+                  <Text
+                    style={[
+                      styles.categoryText,
+                      selectedCategoryId === category.id &&
+                        styles.selectedCategoryText,
+                    ]}
+                  >
                     {category.name}
                   </Text>
                   {selectedCategoryId === category.id && (
-                    <Ionicons 
-                      name="checkmark-circle" 
-                      size={16} 
-                      color={Colors.primary} 
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={16}
+                      color={Colors.primary}
                     />
                   )}
                 </TouchableOpacity>
@@ -297,79 +322,104 @@ const EditTaskScreen = () => {
           {dueDate ? (
             <View style={styles.dueDateContainer}>
               <View style={styles.dueDateInfo}>
-                <Ionicons name="calendar-outline" size={20} color={Colors.primary} />
+                <Ionicons
+                  name="calendar-outline"
+                  size={20}
+                  color={Colors.primary}
+                />
                 <Text style={styles.dueDateText}>{formatDate(dueDate)}</Text>
               </View>
               <View style={styles.dueDateActions}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.dueDateButton}
                   onPress={() => setShowDatePicker(true)}
                 >
                   <Text style={styles.dueDateButtonText}>Change</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.dueDateButton}
                   onPress={removeDueDate}
                 >
-                  <Text style={[styles.dueDateButtonText, { color: Colors.error }]}>
+                  <Text
+                    style={[styles.dueDateButtonText, { color: Colors.error }]}
+                  >
                     Remove
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
           ) : (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.addDueDateButton}
               onPress={() => setShowDatePicker(true)}
             >
-              <Ionicons name="calendar-outline" size={20} color={Colors.textSecondary} />
+              <Ionicons
+                name="calendar-outline"
+                size={20}
+                color={Colors.textSecondary}
+              />
               <Text style={styles.addDueDateText}>Add due date</Text>
             </TouchableOpacity>
+          )}
+          {/* Date Picker */}
+          {showDatePicker && (
+            <DateTimePicker
+              value={dueDate || new Date()}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={onDateChange}
+              minimumDate={new Date()}
+            />
           )}
         </View>
 
         {/* Status Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Status</Text>
-          <View style={styles.statusContainer}>
-            {(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] as TaskStatus[]).map((taskStatus) => (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.statusContainer}
+          >
+            {(
+              [
+                "PENDING",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "CANCELLED",
+              ] as TaskStatus[]
+            ).map((taskStatus) => (
               <TouchableOpacity
                 key={taskStatus}
                 style={[
                   styles.statusCard,
-                  status === taskStatus && styles.selectedStatusCard
+                  status === taskStatus && styles.selectedStatusCard,
                 ]}
                 onPress={() => setStatus(taskStatus)}
               >
-                <Ionicons 
+                <Ionicons
                   name={getStatusIcon(taskStatus)}
-                  size={20} 
-                  color={status === taskStatus ? Colors.textPrimary : getStatusColor(taskStatus)} 
-                />
-                <Text style={[
-                  styles.statusText,
-                  status === taskStatus && styles.selectedStatusText
-                ]}>
-                  {taskStatus === 'IN_PROGRESS' 
-                    ? 'In Progress'
-                    : taskStatus.charAt(0) + taskStatus.slice(1).toLowerCase()
+                  size={20}
+                  color={
+                    status === taskStatus
+                      ? Colors.textPrimary
+                      : getStatusColor(taskStatus)
                   }
+                />
+                <Text
+                  style={[
+                    styles.statusText,
+                    status === taskStatus && styles.selectedStatusText,
+                  ]}
+                >
+                  {taskStatus === "IN_PROGRESS"
+                    ? "In Progress"
+                    : taskStatus.charAt(0) + taskStatus.slice(1).toLowerCase()}
                 </Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
         </View>
-
-        {/* Date Picker */}
-        {showDatePicker && (
-          <DateTimePicker
-            value={dueDate || new Date()}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={onDateChange}
-            minimumDate={new Date()}
-          />
-        )}
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
@@ -378,8 +428,9 @@ const EditTaskScreen = () => {
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
-            styles.updateButton, 
-            (!title.trim() || !selectedCategoryId || isSubmitting) && styles.disabledButton
+            styles.updateButton,
+            (!title.trim() || !selectedCategoryId || isSubmitting) &&
+              styles.disabledButton,
           ]}
           onPress={handleUpdateTask}
           disabled={!title.trim() || !selectedCategoryId || isSubmitting}
@@ -412,8 +463,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     paddingTop: 60,
@@ -421,17 +472,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
   headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: FontSizes.xl,
@@ -451,9 +502,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: Spacing.sm,
   },
   sectionTitle: {
@@ -462,8 +513,8 @@ const styles = StyleSheet.create({
     fontWeight: FontWeights.semibold,
   },
   addCategoryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.xs,
   },
   addCategoryText: {
@@ -486,10 +537,10 @@ const styles = StyleSheet.create({
   },
   textArea: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   noCategoriesContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: Spacing.xl,
     backgroundColor: Colors.backgroundCard,
     borderRadius: BorderRadius.md,
@@ -507,7 +558,7 @@ const styles = StyleSheet.create({
   noCategoriesSubtitle: {
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: Spacing.lg,
   },
   createFirstCategoryButton: {
@@ -527,8 +578,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   categoryCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.backgroundCard,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
@@ -557,9 +608,9 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
   dueDateContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     backgroundColor: Colors.backgroundCard,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
@@ -568,8 +619,8 @@ const styles = StyleSheet.create({
     ...Shadows.small,
   },
   dueDateInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.sm,
   },
   dueDateText: {
@@ -578,7 +629,7 @@ const styles = StyleSheet.create({
     fontWeight: FontWeights.medium,
   },
   dueDateActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.sm,
   },
   dueDateButton: {
@@ -591,8 +642,8 @@ const styles = StyleSheet.create({
     fontWeight: FontWeights.medium,
   },
   addDueDateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: Colors.backgroundCard,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
@@ -607,22 +658,24 @@ const styles = StyleSheet.create({
     fontWeight: FontWeights.medium,
   },
   statusContainer: {
-    flexDirection: 'row',
+    paddingRight: Spacing.lg,
     gap: Spacing.sm,
   },
   statusCard: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: Colors.backgroundCard,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
     borderColor: Colors.border,
     paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
     gap: Spacing.xs,
+    minWidth: 120, // Ensure consistent width for all status cards
     ...Shadows.small,
   },
+
   selectedStatusCard: {
     backgroundColor: Colors.primary,
     borderColor: Colors.primary,
@@ -646,16 +699,16 @@ const styles = StyleSheet.create({
   },
   updateButton: {
     borderRadius: BorderRadius.md,
-    overflow: 'hidden',
+    overflow: "hidden",
     ...Shadows.medium,
   },
   disabledButton: {
     opacity: 0.5,
   },
   updateButtonGradient: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: Spacing.md + 2,
     gap: Spacing.sm,
   },

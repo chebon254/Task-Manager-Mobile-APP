@@ -19,7 +19,7 @@ export interface Task {
   title: string;
   description?: string;
   dueDate?: string;
-  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'; // Fixed: Added IN_PROGRESS
   categoryId: string;
   userId: string;
   createdAt: string;
@@ -32,7 +32,7 @@ export interface Task {
 }
 
 export interface TaskFilters {
-  status?: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  status?: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'; // Fixed: Added IN_PROGRESS
   categoryId?: string;
   search?: string;
 }

@@ -22,7 +22,7 @@ import { AllScreensParamList } from '../types/navigation';
 
 type YourScreenNavigationProp = NavigationProp<AllScreensParamList>;
 
-type TaskStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED';
+type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 const CreateTaskScreen = () => {
   const navigation = useNavigation<YourScreenNavigationProp>();
@@ -30,7 +30,8 @@ const CreateTaskScreen = () => {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState<Date | null>(null);
+  // Set current date by default instead of null
+  const [dueDate, setDueDate] = useState<Date | null>(new Date());
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [status, setStatus] = useState<TaskStatus>('PENDING');
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -106,6 +107,8 @@ const CreateTaskScreen = () => {
         return Colors.success;
       case 'CANCELLED':
         return Colors.error;
+      case 'IN_PROGRESS':
+        return Colors.info;
       default:
         return Colors.warning;
     }
@@ -117,6 +120,8 @@ const CreateTaskScreen = () => {
         return 'checkmark-circle';
       case 'CANCELLED':
         return 'close-circle';
+      case 'IN_PROGRESS':
+        return 'play-circle';
       default:
         return 'time-outline';
     }
@@ -125,6 +130,9 @@ const CreateTaskScreen = () => {
   const handleCreateCategory = () => {
     navigation.navigate('CreateCategory');
   };
+
+  // Check if all required fields are filled
+  const isFormValid = title.trim() && selectedCategoryId;
 
   return (
     <KeyboardAvoidingView 
@@ -257,9 +265,9 @@ const CreateTaskScreen = () => {
           )}
         </View>
 
-        {/* Due Date - MOVED ABOVE STATUS */}
+        {/* Due Date */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Due Date (Optional)</Text>
+          <Text style={styles.sectionTitle}>Due Date</Text>
           {dueDate ? (
             <View style={styles.dueDateContainer}>
               <View style={styles.dueDateInfo}>
@@ -293,7 +301,7 @@ const CreateTaskScreen = () => {
             </TouchableOpacity>
           )}
 
-          {/* Date Picker - MOVED INSIDE DUE DATE SECTION */}
+          {/* Date Picker */}
           {showDatePicker && (
             <View style={styles.datePickerContainer}>
               <DateTimePicker
@@ -307,11 +315,15 @@ const CreateTaskScreen = () => {
           )}
         </View>
 
-        {/* Status Selection - NOW AFTER DUE DATE */}
+        {/* Status Selection - Fixed to show all 4 statuses in horizontal scrollable view */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Status</Text>
-          <View style={styles.statusContainer}>
-            {(['PENDING', 'COMPLETED', 'CANCELLED'] as TaskStatus[]).map((taskStatus) => (
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.statusContainer}
+          >
+            {(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'] as TaskStatus[]).map((taskStatus) => (
               <TouchableOpacity
                 key={taskStatus}
                 style={[
@@ -329,25 +341,28 @@ const CreateTaskScreen = () => {
                   styles.statusText,
                   status === taskStatus && styles.selectedStatusText
                 ]}>
-                  {taskStatus.charAt(0) + taskStatus.slice(1).toLowerCase()}
+                  {taskStatus === 'IN_PROGRESS' 
+                    ? 'In Progress'
+                    : taskStatus.charAt(0) + taskStatus.slice(1).toLowerCase()
+                  }
                 </Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
         </View>
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Create Button */}
+      {/* Create Button - Fixed validation */}
       <View style={styles.footer}>
         <TouchableOpacity
           style={[
             styles.createButton, 
-            (!title.trim() || !selectedCategoryId || isSubmitting) && styles.disabledButton
+            (!isFormValid || isSubmitting) && styles.disabledButton
           ]}
           onPress={handleCreateTask}
-          disabled={!title.trim() || !selectedCategoryId || isSubmitting}
+          disabled={!isFormValid || isSubmitting}
         >
           <LinearGradient
             colors={[Colors.primary, Colors.primaryDark]}
@@ -566,7 +581,6 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     fontWeight: FontWeights.medium,
   },
-  // NEW STYLE FOR DATE PICKER CONTAINER
   datePickerContainer: {
     marginTop: Spacing.md,
     backgroundColor: Colors.backgroundCard,
@@ -576,12 +590,12 @@ const styles = StyleSheet.create({
     padding: Spacing.sm,
     ...Shadows.small,
   },
+  // Fixed status container to be horizontal scrollable
   statusContainer: {
-    flexDirection: 'row',
+    paddingRight: Spacing.lg,
     gap: Spacing.sm,
   },
   statusCard: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -590,7 +604,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
     paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
     gap: Spacing.xs,
+    minWidth: 120, // Ensure consistent width
     ...Shadows.small,
   },
   selectedStatusCard: {
@@ -601,6 +617,7 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
     fontWeight: FontWeights.medium,
+    textAlign: 'center',
   },
   selectedStatusText: {
     color: Colors.textPrimary,

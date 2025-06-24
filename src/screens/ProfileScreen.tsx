@@ -57,26 +57,6 @@ const ProfileScreen = () => {
     );
   };
 
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'This action cannot be undone. All your tasks and data will be permanently deleted.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              'Coming Soon',
-              'Account deletion feature will be available in a future update.'
-            );
-          }
-        }
-      ]
-    );
-  };
-
   const openSettings = (settingName: string) => {
     Alert.alert('Coming Soon', `${settingName} settings will be available in a future update.`);
   };
@@ -173,19 +153,6 @@ const ProfileScreen = () => {
               <View style={styles.settingText}>
                 <Text style={[styles.settingTitle, { color: Colors.error }]}>Sign Out</Text>
                 <Text style={styles.settingSubtitle}>Sign out of your account</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.deleteCard}
-            onPress={handleDeleteAccount}
-          >
-            <View style={styles.settingInfo}>
-              <Ionicons name="trash-outline" size={24} color={Colors.error} />
-              <View style={styles.settingText}>
-                <Text style={[styles.settingTitle, { color: Colors.error }]}>Delete Account</Text>
-                <Text style={styles.settingSubtitle}>Permanently delete your account</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -350,7 +317,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   bottomSpacing: {
-    height: 50,
+    height: 120,
   },
 });
 
